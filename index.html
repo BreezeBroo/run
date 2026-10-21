@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#f4f4f4">
 	<title>Waymark — route library</title>
-	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23000000'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E">
+	<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -240,10 +240,10 @@
 		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
-		.route-tab .count { font-size: 9px; }
-		.route-filter { display: grid; gap: 9px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+		.route-tab .count { color: inherit; font: inherit; }
+		.route-filter { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 		.distance-label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
-		.distance-filter { display: grid; gap: 4px; }
+		.distance-filter { display: grid; min-width: 0; gap: 4px; }
 		.distance-values { display: flex; justify-content: space-between; color: var(--secondary-text); font: 10px var(--mono); }
 		.distance-slider { position: relative; height: 22px; margin: 0 8px; }
 		.distance-track, .distance-range { position: absolute; top: 9px; height: 4px; border-radius: 4px; }
@@ -448,10 +448,10 @@
 			<aside class="sidebar" aria-label="Route library">
 				<div class="route-tabs" id="route-tabs" role="group" aria-label="Route ownership">
 					<button class="route-tab" id="saved-routes-tab" type="button" data-category="mine" aria-controls="route-list" aria-pressed="false">
-						My routes <span class="count" id="route-count">00</span>
+						My routes <span class="count" id="route-count">(00)</span>
 					</button>
 					<button class="route-tab" id="public-routes-tab" type="button" data-category="public" aria-controls="route-list" aria-pressed="false">
-						Public routes <span class="count" id="public-route-count">00</span>
+						Public routes <span class="count" id="public-route-count">(00)</span>
 					</button>
 				</div>
 				<div class="route-filter">
@@ -629,8 +629,8 @@
 			routeList.classList.remove("category-forward", "category-back");
 			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
 			const publicRoutes = routes.filter((route) => route.id === starterRoute.id);
-			document.getElementById("route-count").textContent = String(myRoutes.length).padStart(2, "0");
-			document.getElementById("public-route-count").textContent = String(publicRoutes.length).padStart(2, "0");
+			document.getElementById("route-count").textContent = `(${String(myRoutes.length).padStart(2, "0")})`;
+			document.getElementById("public-route-count").textContent = `(${String(publicRoutes.length).padStart(2, "0")})`;
 			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
 			const minimumDistance = Number(distanceMin.value);
 			const maximumDistance = Number(distanceMax.value);
