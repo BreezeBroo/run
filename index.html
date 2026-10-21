@@ -542,10 +542,10 @@
 		const settingsDialog = document.getElementById("settings-dialog");
 		const themeNames = ["forest", "light", "dark", "system"];
 		const distanceCategories = [
-			{ id: "5k", max: 5 },
-			{ id: "10k", max: 10 },
-			{ id: "half", max: 21.0975 },
-			{ id: "marathon", max: Infinity }
+			{ id: "5k", distance: 5 },
+			{ id: "10k", distance: 10 },
+			{ id: "half", distance: 21.0975 },
+			{ id: "marathon", distance: 42.195 }
 		];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
@@ -555,7 +555,9 @@
 		function getDistanceCategory(distance) {
 			const kilometers = Number(distance);
 			if (!Number.isFinite(kilometers) || kilometers <= 0) return null;
-			return distanceCategories.find((category) => kilometers <= category.max)?.id || "marathon";
+			return distanceCategories.reduce((nearest, category) =>
+				Math.abs(kilometers - category.distance) < Math.abs(kilometers - nearest.distance) ? category : nearest
+			).id;
 		}
 
 		function applyTheme(theme) {
