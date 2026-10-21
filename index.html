@@ -9,6 +9,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 	<style>
 		:root {
 			color-scheme: light;
@@ -317,6 +318,8 @@
 		.open-map:hover { background: var(--hover); }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
+		.map-frame iframe[hidden], .suggested-map[hidden] { display: none; }
+		.suggested-map { position: absolute; inset: 0; z-index: 1; }
 		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); text-align: center; }
 		.empty-inner { max-width: 280px; }
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
@@ -340,6 +343,14 @@
 		.field input:focus, .field textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
 		.field textarea { min-height: 102px; resize: vertical; line-height: 1.5; }
 		.field-hint { color: var(--quiet-text); font-size: 11px; line-height: 1.4; }
+		.suggest-route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, .7fr) auto; align-items: end; gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--hover); }
+		.suggest-distance { display: grid; gap: 6px; color: var(--field-label); font: 9px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+		.suggest-distance input, .suggest-distance select { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--ink); font: 12px var(--sans); letter-spacing: 0; }
+		.suggest-route button { min-height: 39px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; }
+		.suggest-route button:hover { background: var(--active); }
+		.suggest-route button:disabled { cursor: wait; opacity: .65; }
+		.suggestion-note, .suggestion-status { grid-column: 1 / -1; margin: 0; color: var(--quiet-text); font-size: 10px; line-height: 1.45; }
+		.suggestion-status { color: var(--stat-value); }
 		.form-error { min-height: 16px; margin: -5px 0 0; color: var(--danger); font-size: 12px; }
 		.form-actions { display: flex; justify-content: flex-end; gap: 9px; }
 		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); font-size: 12px; font-weight: 700; cursor: pointer; }
@@ -411,6 +422,7 @@
 			.stat { min-width: 0; flex: 1; padding: 14px 15px; }
 			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
 			.dialog-head, .route-form, .theme-options { padding-left: 19px; padding-right: 19px; }
+			.suggest-route { grid-template-columns: 1fr; }
 		}
 		@media (prefers-reduced-motion: reduce) {
 			*, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -489,6 +501,7 @@
 				</div>
 				<div class="map-frame" id="map-frame">
 					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
+					<div class="suggested-map" id="suggested-map" aria-label="Suggested walking route map" hidden></div>
 					<div class="map-empty" id="map-empty">
 						<div class="empty-inner"><strong>Map unavailable.</strong><span>This map can’t be displayed here. Open it to view it on its original site.</span></div>
 					</div>
@@ -516,6 +529,24 @@
 				<label for="route-url-input">Map URL or iframe</label>
 				<textarea id="route-url-input" name="url" placeholder="Paste an https:// map URL or the full <iframe> code" required></textarea>
 				<span class="field-hint">Length is detected from On The Go Map links when available. Your route stays saved on this device.</span>
+			</div>
+			<div class="suggest-route">
+				<label class="suggest-distance" for="suggested-activity">
+					Activity
+					<select id="suggested-activity" aria-required="true">
+						<option value="" selected disabled>Choose activity</option>
+						<option value="walking">Walking / hiking</option>
+						<option value="running">Running</option>
+						<option value="cycling">Cycling</option>
+					</select>
+				</label>
+				<label class="suggest-distance" for="suggested-distance">
+					Target distance (km)
+					<input id="suggested-distance" type="number" min="1" max="50" step="0.5" placeholder="Choose distance" aria-required="true">
+				</label>
+				<button id="suggest-route-button" type="button">Suggest nearby route</button>
+				<p class="suggestion-note">Uses your location to request a nearby loop from OpenStreetMap's public routing service.</p>
+				<p class="suggestion-status" id="suggestion-status" role="status" aria-live="polite"></p>
 			</div>
 			<p class="form-error" id="form-error" role="alert"></p>
 			<div class="form-actions">
@@ -551,6 +582,7 @@
 	</dialog>
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script>
 		const starterRoute = {
 			id: "starter-route",
@@ -571,14 +603,27 @@
 		const distanceMax = document.getElementById("distance-max");
 		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
+		const suggestedMapElement = document.getElementById("suggested-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
 		const routeDialog = document.getElementById("route-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
+		const suggestRouteButton = document.getElementById("suggest-route-button");
+		const suggestionStatus = document.getElementById("suggestion-status");
+		const suggestedActivity = document.getElementById("suggested-activity");
+		const suggestedDistance = document.getElementById("suggested-distance");
 		const themeNames = ["forest", "light", "dark", "system"];
+		const routeActivities = {
+			walking: { label: "Walking / hiking", kind: "Walk / Hike", profile: "foot", engine: "fossgis_osrm_foot" },
+			running: { label: "Running", kind: "Run", profile: "foot", engine: "fossgis_osrm_foot" },
+			cycling: { label: "Cycling", kind: "Cycle", profile: "bike", engine: "fossgis_osrm_bike" }
+		};
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
 		let activeCategory = "mine";
+		let pendingSuggestedRoute = null;
+		let suggestedLeafletMap = null;
+		let suggestedRouteLayer = null;
 		let toastTimer;
 
 		function applyTheme(theme) {
@@ -712,12 +757,46 @@
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
+			if (route.geometry?.type === "LineString" && Array.isArray(route.geometry.coordinates)) {
+				showSuggestedRoute(route);
+				return;
+			}
+			suggestedMapElement.hidden = true;
+			mapFrame.hidden = false;
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
 			mapFrame.hidden = false;
 			mapEmpty.style.display = "none";
 			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
+		}
+
+		function showSuggestedRoute(route) {
+			if (!window.L) {
+				mapEmpty.style.display = "grid";
+				mapFrame.hidden = true;
+				suggestedMapElement.hidden = true;
+				showToast("The route map library could not load. Open the map to view your route.");
+				mapLink.href = route.url;
+				return;
+			}
+			mapEmpty.style.display = "none";
+			mapFrame.hidden = true;
+			suggestedMapElement.hidden = false;
+			mapLink.href = route.url;
+			if (!suggestedLeafletMap) {
+				suggestedLeafletMap = L.map(suggestedMapElement);
+				L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+					maxZoom: 19,
+					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+				}).addTo(suggestedLeafletMap);
+			}
+			if (suggestedRouteLayer) suggestedLeafletMap.removeLayer(suggestedRouteLayer);
+			suggestedRouteLayer = L.geoJSON(route.geometry, {
+				style: { color: getComputedStyle(document.documentElement).getPropertyValue("--coral").trim(), weight: 5, opacity: 0.9 }
+			}).addTo(suggestedLeafletMap);
+			suggestedLeafletMap.fitBounds(suggestedRouteLayer.getBounds(), { padding: [24, 24] });
+			requestAnimationFrame(() => suggestedLeafletMap.invalidateSize());
 		}
 
 		routeTabs.addEventListener("click", (event) => {
@@ -789,10 +868,143 @@
 			return Number.isFinite(meters) && meters > 0 ? meters / 1000 : null;
 		}
 
+		function getLoopWaypoints(latitude, longitude, distanceKm) {
+			const earthRadius = 6371000;
+			const loopRadius = distanceKm * 1000 / (2 + 2 * Math.sqrt(3));
+			const origin = [longitude, latitude];
+			const points = [origin];
+			for (const bearingDegrees of [0, 120, 240]) {
+				const bearing = bearingDegrees * Math.PI / 180;
+				const angularDistance = loopRadius / earthRadius;
+				const latitudeRadians = latitude * Math.PI / 180;
+				const longitudeRadians = longitude * Math.PI / 180;
+				const pointLatitude = Math.asin(
+					Math.sin(latitudeRadians) * Math.cos(angularDistance) +
+					Math.cos(latitudeRadians) * Math.sin(angularDistance) * Math.cos(bearing)
+				);
+				const pointLongitude = longitudeRadians + Math.atan2(
+					Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latitudeRadians),
+					Math.cos(angularDistance) - Math.sin(latitudeRadians) * Math.sin(pointLatitude)
+				);
+				points.push([pointLongitude * 180 / Math.PI, pointLatitude * 180 / Math.PI]);
+			}
+			points.push(origin);
+			return points;
+		}
+
+		function getCurrentPosition() {
+			return new Promise((resolve, reject) => {
+				navigator.geolocation.getCurrentPosition(
+					resolve,
+					(error) => reject(new Error(
+						error.code === error.PERMISSION_DENIED
+							? "Location permission was denied."
+							: error.code === error.POSITION_UNAVAILABLE
+								? "Your location is unavailable."
+								: "Location request timed out."
+					)),
+					{ enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+				);
+			});
+		}
+
+		async function suggestRoute() {
+			const formError = document.getElementById("form-error");
+			const activity = routeActivities[suggestedActivity.value];
+			const targetDistance = suggestedDistance.valueAsNumber;
+			formError.textContent = "";
+			suggestionStatus.textContent = "";
+			if (!activity) {
+				formError.textContent = "Choose walking / hiking, running, or cycling.";
+				suggestedActivity.focus();
+				return;
+			}
+			if (!Number.isFinite(targetDistance) || targetDistance < 1 || targetDistance > 50) {
+				formError.textContent = "Choose a target distance from 1 to 50 km.";
+				suggestedDistance.focus();
+				return;
+			}
+			if (!navigator.geolocation) {
+				formError.textContent = "Location is not available in this browser.";
+				return;
+			}
+
+			suggestRouteButton.disabled = true;
+			suggestedActivity.disabled = true;
+			suggestedDistance.disabled = true;
+			suggestRouteButton.textContent = "Finding a route…";
+			suggestionStatus.textContent = `Requesting your location and finding a nearby ${activity.label.toLowerCase()} loop…`;
+			try {
+				const position = await getCurrentPosition();
+				const waypoints = getLoopWaypoints(position.coords.latitude, position.coords.longitude, targetDistance);
+				const routeRequest = new URL(`https://routing.openstreetmap.de/routed-${activity.profile}/route/v1/driving/${waypoints.map((point) => point.join(",")).join(";")}`);
+				routeRequest.searchParams.set("overview", "full");
+				routeRequest.searchParams.set("geometries", "geojson");
+				routeRequest.searchParams.set("steps", "false");
+				const response = await fetch(routeRequest, { signal: AbortSignal.timeout(20000) });
+				if (!response.ok) throw new Error("The selected route service is unavailable. Please try again.");
+				const result = await response.json();
+				const suggested = result.routes?.[0];
+				if (result.code !== "Ok" || !suggested?.geometry?.coordinates?.length ||
+					!Number.isFinite(suggested.distance) || !Array.isArray(result.waypoints) || result.waypoints.length !== waypoints.length) {
+					throw new Error("No suitable loop was found nearby. Try a different target distance.");
+				}
+				const snappedWaypoints = result.waypoints.map((waypoint) =>
+					`${waypoint.location[1].toFixed(6)},${waypoint.location[0].toFixed(6)}`
+				).join(";");
+				const mapUrl = new URL("https://www.openstreetmap.org/directions");
+				mapUrl.searchParams.set("engine", activity.engine);
+				mapUrl.searchParams.set("route", snappedWaypoints);
+				pendingSuggestedRoute = {
+					url: mapUrl.href,
+					distance: suggested.distance / 1000,
+					geometry: suggested.geometry,
+					kind: activity.kind
+				};
+				document.getElementById("route-name-input").value = `Suggested ${activity.label.toLowerCase()} (${pendingSuggestedRoute.distance.toFixed(1)} km)`;
+				document.getElementById("route-url-input").value = pendingSuggestedRoute.url;
+				suggestionStatus.textContent = `Found a ${pendingSuggestedRoute.distance.toFixed(1)} km ${activity.label.toLowerCase()} loop. Review the name and save it to your routes.`;
+			} catch (error) {
+				document.getElementById("form-error").textContent = error instanceof TypeError
+					? "Could not contact the walking route service. Check your connection and try again."
+					: error.message;
+			} finally {
+				suggestRouteButton.disabled = false;
+				suggestedActivity.disabled = false;
+				suggestedDistance.disabled = false;
+				suggestRouteButton.textContent = "Suggest nearby route";
+			}
+		}
+
+		function invalidateSuggestedRoute() {
+			if (!pendingSuggestedRoute) return;
+			if (document.getElementById("route-url-input").value === pendingSuggestedRoute.url) {
+				document.getElementById("route-url-input").value = "";
+			}
+			if (document.getElementById("route-name-input").value.startsWith("Suggested ")) {
+				document.getElementById("route-name-input").value = "";
+			}
+			pendingSuggestedRoute = null;
+			suggestionStatus.textContent = "";
+		}
+
 		document.getElementById("add-route").addEventListener("click", () => {
 			document.getElementById("form-error").textContent = "";
+			suggestionStatus.textContent = "";
+			pendingSuggestedRoute = null;
+			suggestedActivity.value = "";
+			suggestedDistance.value = "";
 			routeDialog.showModal();
 			document.getElementById("route-name-input").focus();
+		});
+		suggestRouteButton.addEventListener("click", suggestRoute);
+		suggestedActivity.addEventListener("change", invalidateSuggestedRoute);
+		suggestedDistance.addEventListener("input", invalidateSuggestedRoute);
+		document.getElementById("route-url-input").addEventListener("input", () => {
+			if (pendingSuggestedRoute && document.getElementById("route-url-input").value !== pendingSuggestedRoute.url) {
+				pendingSuggestedRoute = null;
+				suggestionStatus.textContent = "";
+			}
 		});
 		document.getElementById("close-dialog").addEventListener("click", () => routeDialog.close());
 		document.getElementById("cancel-dialog").addEventListener("click", () => routeDialog.close());
@@ -805,19 +1017,23 @@
 			const errorElement = document.getElementById("form-error");
 			try {
 				const url = getMapUrl(form.elements.url.value);
+				const suggested = pendingSuggestedRoute?.url === url ? pendingSuggestedRoute : null;
 				const route = {
 					id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
 					name: form.elements.name.value.trim(),
 					url,
-					distance: getRouteDistance(url),
-					kind: "Route",
-					type: "Route"
+					distance: suggested?.distance ?? getRouteDistance(url),
+					kind: suggested?.kind || "Route",
+					type: suggested ? "Loop" : "Route",
+					...(suggested ? { geometry: suggested.geometry } : {})
 				};
 				if (!route.name) throw new Error("Add a name for this route.");
 				routes.push(route);
 				persistRoutes();
 				selectRoute(route.id);
 				form.reset();
+				pendingSuggestedRoute = null;
+				suggestionStatus.textContent = "";
 				routeDialog.close();
 				showToast("Route added to your library.");
 			} catch (error) {
