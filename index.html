@@ -46,7 +46,7 @@
 			color: white;
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
-		.brand-mark { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; background: var(--leaf); color: var(--forest); font-size: 17px; }
+		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; }
 		.brand-name { font-size: 16px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: #d3ddd5; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
 		.top-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); }
@@ -60,9 +60,11 @@
 		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
 		.count { color: var(--muted); font: 11px var(--mono); }
 		.route-list { padding: 8px; }
-		.route-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
-		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
-		.route-tab[aria-pressed="true"] { border-bottom-color: var(--coral); color: var(--ink); }
+		.route-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
+		.route-tabs[data-active-category="public"]::after { transform: translateX(100%); }
+		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { font-size: 9px; }
 		.route-item {
@@ -189,7 +191,7 @@
 <body>
 	<header class="topbar">
 		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
-			<span class="brand-mark" aria-hidden="true">↗</span>
+					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<span class="brand-name">waymark</span>
 		</a>
 		<span class="top-note">Your route library</span>
@@ -206,7 +208,7 @@
 
 		<section class="workspace" aria-label="Route library and route map">
 			<aside class="sidebar" aria-label="Route library">
-				<div class="route-tabs" role="group" aria-label="Route categories">
+				<div class="route-tabs" id="route-tabs" role="group" aria-label="Route categories">
 					<button class="route-tab" id="saved-routes-tab" type="button" aria-controls="route-list" aria-pressed="false">
 						Saved routes <span class="count" id="route-count">00</span>
 					</button>
@@ -255,11 +257,7 @@
 			<div class="field">
 				<label for="route-url-input">Map URL or iframe</label>
 				<textarea id="route-url-input" name="url" placeholder="Paste an https:// map URL or the full <iframe> code" required></textarea>
-				<span class="field-hint">The map must allow embedding. Your route stays saved on this device.</span>
-			</div>
-			<div class="field">
-				<label for="route-distance-input">Distance in km <span style="color:#879087;text-transform:none;letter-spacing:0">(optional)</span></label>
-				<input id="route-distance-input" name="distance" type="number" min="0" step="0.01" placeholder="e.g. 5.4">
+				<span class="field-hint">Length is detected from On The Go Map links when available. Your route stays saved on this device.</span>
 			</div>
 			<p class="form-error" id="form-error" role="alert"></p>
 			<div class="form-actions">
@@ -281,6 +279,7 @@
 		};
 		const storageKey = "waymark-routes-v1";
 		const routeList = document.getElementById("route-list");
+		const routeTabs = document.getElementById("route-tabs");
 		const savedRoutesTab = document.getElementById("saved-routes-tab");
 		const publicRoutesTab = document.getElementById("public-routes-tab");
 		const addRouteButton = document.getElementById("add-route");
@@ -320,6 +319,7 @@
 			const showingSavedRoutes = activeCategory === "saved";
 			const categoryRoutes = showingSavedRoutes ? savedRoutes : [starterRoute];
 			renderRouteList(categoryRoutes, routeList);
+			routeTabs.dataset.activeCategory = activeCategory;
 			if (animationDirection) {
 				routeList.classList.add(animationDirection);
 			}
@@ -346,7 +346,7 @@
 				name.textContent = route.name;
 				const distance = document.createElement("span");
 				distance.className = "route-distance";
-				distance.textContent = route.distance ? `${Number(route.distance).toFixed(2)} km` : "— km";
+				distance.textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 				top.append(name, distance);
 
 				const sub = document.createElement("span");
@@ -384,7 +384,7 @@
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
-			document.getElementById("active-distance").textContent = route.distance ? `${Number(route.distance).toFixed(2)} km` : "Not specified";
+			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
@@ -434,6 +434,13 @@
 			return url.href;
 		}
 
+		function getRouteDistance(url) {
+			const parsedUrl = new URL(url);
+			if (!/(^|\.)onthegomap\.com$/i.test(parsedUrl.hostname)) return null;
+			const meters = Number(parsedUrl.searchParams.get("d"));
+			return Number.isFinite(meters) && meters > 0 ? meters / 1000 : null;
+		}
+
 		document.getElementById("add-route").addEventListener("click", () => {
 			document.getElementById("form-error").textContent = "";
 			routeDialog.showModal();
@@ -450,12 +457,11 @@
 			const errorElement = document.getElementById("form-error");
 			try {
 				const url = getMapUrl(form.elements.url.value);
-				const distanceValue = form.elements.distance.value;
 				const route = {
 					id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
 					name: form.elements.name.value.trim(),
 					url,
-					distance: distanceValue ? Number(distanceValue) : null,
+					distance: getRouteDistance(url),
 					kind: "Route",
 					type: "Route"
 				};
