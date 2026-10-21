@@ -1,1 +1,1 @@
-# run
+Waymark lets you easily plot and save your custom routes using onthego maps, build a personal library of your adventures, and discover public routes curated by a global community of outdoor enthusiasts.
