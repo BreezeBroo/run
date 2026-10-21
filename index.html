@@ -322,7 +322,7 @@
 		.suggested-map { position: absolute; inset: 0; z-index: 1; }
 		.route-map-key { position: absolute; bottom: 14px; left: 14px; z-index: 400; display: inline-flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--ink); font-size: 11px; font-weight: 700; box-shadow: var(--shadow); }
 		.route-map-key[hidden] { display: none; }
-		.route-map-swatch { width: 24px; height: 5px; border: 1px solid #fff; border-radius: 4px; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); }
+		.route-map-swatch { width: 24px; height: 5px; border: 1px solid #fff; border-radius: 4px; background: #1769aa; box-shadow: 0 0 0 1px #1769aa; }
 		.route-map-point { width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; }
 		.route-map-point.start { background: #247a52; }
 		.route-map-point.finish { background: #b84635; }
@@ -552,7 +552,7 @@
 				</label>
 				<label class="suggest-distance" for="suggested-distance">
 					Target distance (km)
-					<input id="suggested-distance" type="number" min="1" max="50" step="0.5" placeholder="Choose distance" aria-required="true">
+					<input id="suggested-distance" type="number" min="1" max="50" step="0.1" placeholder="Choose distance" aria-required="true">
 				</label>
 				<button id="suggest-route-button" type="button">Suggest nearby route</button>
 				<p class="suggestion-note">Uses your location to request a nearby loop from OpenStreetMap's public routing service.</p>
@@ -807,16 +807,17 @@
 
 		function createSuggestedMap(element) {
 			const map = L.map(element);
-			L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-				maxZoom: 19,
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+				maxZoom: 20,
+				subdomains: "abcd",
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 			}).addTo(map);
 			return map;
 		}
 
 		function drawSuggestedRoute(map, oldLayer, route) {
 			if (oldLayer) map.removeLayer(oldLayer);
-			const color = getComputedStyle(document.documentElement).getPropertyValue("--coral").trim() || "#d9785e";
+			const color = "#1769aa";
 			const routeGroup = L.featureGroup();
 			const casing = L.geoJSON(route.geometry, {
 				style: { color: "#ffffff", weight: 12, opacity: 0.95, lineCap: "round", lineJoin: "round" }
@@ -942,7 +943,7 @@
 
 		function getLoopWaypoints(latitude, longitude, distanceKm) {
 			const earthRadius = 6371000;
-			const loopRadius = distanceKm * 1000 / (2 + 2 * Math.sqrt(3));
+			const loopRadius = distanceKm * 1000 / (2 + 3 * Math.sqrt(3));
 			const origin = [longitude, latitude];
 			const points = [origin];
 			for (const bearingDegrees of [0, 120, 240]) {
@@ -962,6 +963,44 @@
 			}
 			points.push(origin);
 			return points;
+		}
+
+		async function getSuggestedLoop(activity, latitude, longitude, targetDistance) {
+			const toleranceMeters = Math.max(25, targetDistance * 1000 * 0.01);
+			let radiusDistance = targetDistance;
+			let bestRoute = null;
+			let bestWaypoints = null;
+			for (let attempt = 0; attempt < 5; attempt += 1) {
+				const waypoints = getLoopWaypoints(latitude, longitude, radiusDistance);
+				const routeRequest = new URL(`https://routing.openstreetmap.de/routed-${activity.profile}/route/v1/driving/${waypoints.map((point) => point.join(",")).join(";")}`);
+				routeRequest.searchParams.set("overview", "full");
+				routeRequest.searchParams.set("geometries", "geojson");
+				routeRequest.searchParams.set("steps", "false");
+				const response = await fetch(routeRequest, { signal: AbortSignal.timeout(20000) });
+				if (!response.ok) throw new Error("The selected route service is unavailable. Please try again.");
+				const result = await response.json();
+				const route = result.routes?.[0];
+				if (result.code !== "Ok" || !route?.geometry?.coordinates?.length ||
+					route.geometry.coordinates.some((coordinate) => !Array.isArray(coordinate) || coordinate.length < 2 ||
+						!Number.isFinite(coordinate[0]) || !Number.isFinite(coordinate[1])) ||
+					!Number.isFinite(route.distance) || !Array.isArray(result.waypoints) || result.waypoints.length !== waypoints.length ||
+					result.waypoints.some((waypoint) => !Array.isArray(waypoint.location) || waypoint.location.length < 2 ||
+						!Number.isFinite(waypoint.location[0]) || !Number.isFinite(waypoint.location[1]))) {
+					if (bestRoute) break;
+					throw new Error("No suitable loop was found nearby. Try a different target distance.");
+				}
+				if (!bestRoute || Math.abs(route.distance - targetDistance * 1000) < Math.abs(bestRoute.distance - targetDistance * 1000)) {
+					bestRoute = route;
+					bestWaypoints = result.waypoints;
+				}
+				const error = targetDistance * 1000 - route.distance;
+				if (Math.abs(error) <= toleranceMeters) break;
+				radiusDistance = Math.max(0.15, Math.min(75,
+					radiusDistance * Math.max(0.7, Math.min(1.3, targetDistance * 1000 / route.distance))
+				));
+			}
+			if (!bestRoute || !bestWaypoints) throw new Error("No suitable loop was found nearby. Try a different target distance.");
+			return { route: bestRoute, waypoints: bestWaypoints };
 		}
 
 		function getCurrentPosition() {
@@ -1014,20 +1053,13 @@
 			suggestionStatus.textContent = `Requesting your location and finding a nearby ${activity.label.toLowerCase()} loop…`;
 			try {
 				const position = await getCurrentPosition();
-				const waypoints = getLoopWaypoints(position.coords.latitude, position.coords.longitude, targetDistance);
-				const routeRequest = new URL(`https://routing.openstreetmap.de/routed-${activity.profile}/route/v1/driving/${waypoints.map((point) => point.join(",")).join(";")}`);
-				routeRequest.searchParams.set("overview", "full");
-				routeRequest.searchParams.set("geometries", "geojson");
-				routeRequest.searchParams.set("steps", "false");
-				const response = await fetch(routeRequest, { signal: AbortSignal.timeout(20000) });
-				if (!response.ok) throw new Error("The selected route service is unavailable. Please try again.");
-				const result = await response.json();
-				const suggested = result.routes?.[0];
-				if (result.code !== "Ok" || !suggested?.geometry?.coordinates?.length ||
-					!Number.isFinite(suggested.distance) || !Array.isArray(result.waypoints) || result.waypoints.length !== waypoints.length) {
-					throw new Error("No suitable loop was found nearby. Try a different target distance.");
-				}
-				const snappedWaypoints = result.waypoints.map((waypoint) =>
+				const { route: suggested, waypoints } = await getSuggestedLoop(
+					activity,
+					position.coords.latitude,
+					position.coords.longitude,
+					targetDistance
+				);
+				const snappedWaypoints = waypoints.map((waypoint) =>
 					`${waypoint.location[1].toFixed(6)},${waypoint.location[0].toFixed(6)}`
 				).join(";");
 				const mapUrl = new URL("https://www.openstreetmap.org/directions");
@@ -1039,9 +1071,13 @@
 					geometry: suggested.geometry,
 					kind: activity.kind
 				};
-				document.getElementById("route-name-input").value = `Suggested ${activity.label.toLowerCase()} (${pendingSuggestedRoute.distance.toFixed(1)} km)`;
+				document.getElementById("route-name-input").value = `Suggested ${activity.label.toLowerCase()} (${pendingSuggestedRoute.distance.toFixed(2)} km)`;
 				document.getElementById("route-url-input").value = pendingSuggestedRoute.url;
-				suggestionStatus.textContent = `Found a ${pendingSuggestedRoute.distance.toFixed(1)} km ${activity.label.toLowerCase()} loop. Review the name and save it to your routes.`;
+				const distanceDifference = pendingSuggestedRoute.distance - targetDistance;
+				const distanceNote = Math.abs(distanceDifference) <= Math.max(25, targetDistance * 10)
+					? `target ${targetDistance.toFixed(2)} km`
+					: `${distanceDifference > 0 ? "+" : ""}${distanceDifference.toFixed(2)} km from target`;
+				suggestionStatus.textContent = `Found a ${pendingSuggestedRoute.distance.toFixed(2)} km ${activity.label.toLowerCase()} loop (${distanceNote}). Review the map and save it to your routes.`;
 				previewSuggestedRoute(pendingSuggestedRoute);
 			} catch (error) {
 				document.getElementById("form-error").textContent = error instanceof TypeError
