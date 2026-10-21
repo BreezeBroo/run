@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f1f3ee">
+	<title>Waymark — route library</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #202721;
+			--muted: #758078;
+			--paper: #f1f3ee;
+			--white: #fff;
+			--line: #e2e7df;
+			--forest: #263c31;
+			--leaf: #d4f06b;
+			--coral: #ed785e;
+			--mono: "DM Mono", monospace;
+			--sans: "DM Sans", sans-serif;
+			--serif: "Fraunces", Georgia, serif;
+		}
+
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			min-width: 320px;
+			background: var(--paper);
+			color: var(--ink);
+			font-family: var(--sans);
+			-webkit-font-smoothing: antialiased;
+		}
+		button, input, textarea { font: inherit; }
+		button { color: inherit; }
+		.topbar {
+			min-height: 72px;
+			padding: 0 5.2vw;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			background: var(--forest);
+			color: white;
+		}
+		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
+		.brand-mark { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; background: var(--leaf); color: var(--forest); font-size: 17px; }
+		.brand-name { font-size: 16px; }
+		.top-note { display: flex; align-items: center; gap: 9px; color: #d3ddd5; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+		.top-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); }
+		.page { max-width: 1480px; margin: auto; padding: 48px 5.2vw 44px; }
+		.intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+		.eyebrow { margin: 0 0 11px; color: #66736a; font: 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+		h1 { margin: 0; font: 500 clamp(32px, 4vw, 48px)/1.05 var(--serif); letter-spacing: 0; }
+		.intro-copy { max-width: 300px; margin: 0 0 4px; color: #68746b; font-size: 14px; line-height: 1.6; }
+		.workspace { display: grid; grid-template-columns: minmax(255px, 310px) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+		.sidebar, .map-panel { background: var(--white); border: 1px solid var(--line); border-radius: 5px; }
+		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
+		.side-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 20px 17px; border-bottom: 1px solid var(--line); }
+		.side-head h2 { margin: 0; font-size: 14px; font-weight: 700; }
+		.count { color: var(--muted); font: 11px var(--mono); }
+		.route-list { padding: 8px; }
+		.route-item {
+			position: relative;
+			width: 100%;
+			padding: 15px 12px;
+			border: 1px solid transparent;
+			border-radius: 3px;
+			background: transparent;
+			text-align: left;
+			cursor: pointer;
+			transition: background .18s ease, border-color .18s ease, transform .18s ease;
+		}
+		.route-entry { position: relative; }
+		.route-item:hover { background: #f7f8f5; }
+		.route-item.active { border-color: #dfe8d5; background: #f4f7ef; }
+		.route-item.active::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; background: var(--coral); border-radius: 0 3px 3px 0; }
+		.route-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+		.route-name { overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+		.route-distance { flex: none; color: #4b5e4f; font: 11px var(--mono); }
+		.route-sub { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: #818b83; font-size: 11px; }
+		.route-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
+		.remove-route { position: absolute; right: 10px; bottom: 11px; padding: 3px 5px; border: 0; background: transparent; color: #8a938c; font-size: 11px; cursor: pointer; opacity: 0; }
+		.route-entry:hover .remove-route, .route-entry:focus-within .remove-route { opacity: 1; }
+		.remove-route:hover { color: #b4412c; }
+		.add-route {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 9px;
+			margin: 10px 16px 20px;
+			min-height: 43px;
+			border: 1px dashed #bdc8bd;
+			border-radius: 3px;
+			background: transparent;
+			color: #435448;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: border-color .18s ease, background .18s ease;
+		}
+		.add-route:hover { border-color: #7e947e; background: #f7f9f4; }
+		.plus { font-size: 20px; font-weight: 400; line-height: 1; }
+		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: #879087; font: 10px/1.6 var(--mono); letter-spacing: .035em; }
+		.map-panel { min-width: 0; overflow: hidden; }
+		.map-heading { min-height: 75px; padding: 17px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+		.map-title { min-width: 0; }
+		.map-title h2 { margin: 0 0 5px; overflow: hidden; font-size: 17px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
+		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 3px; color: #48574b; font-size: 11px; font-weight: 600; text-decoration: none; transition: background .16s ease; }
+		.open-map:hover { background: #f3f5f0; }
+		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: #dce6dc; }
+		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
+		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, #ffffff66 14.2% 14.5%, transparent 14.7% 23%, #ffffff66 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, #ffffff70 19.2% 19.5%, transparent 19.7% 29%, #ffffff70 29.2% 29.5%, transparent 29.7%), #e6ebe3; text-align: center; }
+		.empty-inner { max-width: 280px; }
+		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
+		.empty-inner span { color: #68746b; font-size: 13px; line-height: 1.6; }
+		.stats { display: flex; align-items: stretch; border-top: 1px solid var(--line); }
+		.stat { min-width: 140px; padding: 17px 22px; }
+		.stat + .stat { border-left: 1px solid var(--line); }
+		.stat-label { display: block; margin-bottom: 5px; color: #879087; font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.stat-value { color: #34453a; font: 500 17px var(--serif); }
+		.credit { margin-left: auto; align-self: center; padding: 0 22px; color: #8a938c; font-size: 10px; text-align: right; }
+		dialog { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid #dce3da; border-radius: 5px; background: white; color: var(--ink); box-shadow: 0 24px 80px #14221938; }
+		dialog::backdrop { background: #17241dcc; backdrop-filter: blur(3px); }
+		.dialog-head { display: flex; justify-content: space-between; align-items: start; padding: 24px 25px 18px; border-bottom: 1px solid var(--line); }
+		.dialog-head h2 { margin: 0; font: 500 25px var(--serif); }
+		.dialog-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+		.close-dialog { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 3px; background: white; font-size: 18px; cursor: pointer; }
+		.route-form { display: grid; gap: 16px; padding: 21px 25px 25px; }
+		.field { display: grid; gap: 7px; }
+		.field label { color: #536157; font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #d8dfd6; border-radius: 3px; outline: none; background: #fcfdfb; color: var(--ink); font-size: 13px; }
+		.field input:focus, .field textarea:focus { border-color: #819584; box-shadow: 0 0 0 3px #d4f06b55; }
+		.field textarea { min-height: 102px; resize: vertical; line-height: 1.5; }
+		.field-hint { color: #879087; font-size: 11px; line-height: 1.4; }
+		.form-error { min-height: 16px; margin: -5px 0 0; color: #b4412c; font-size: 12px; }
+		.form-actions { display: flex; justify-content: flex-end; gap: 9px; }
+		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 3px; background: white; font-size: 12px; font-weight: 600; cursor: pointer; }
+		.form-actions .save-route { border-color: var(--forest); background: var(--forest); color: white; }
+		.form-actions .save-route:hover { background: #344f40; }
+		.toast { position: fixed; right: 22px; bottom: 20px; z-index: 2; padding: 12px 16px; border-radius: 3px; background: var(--forest); color: white; font-size: 12px; box-shadow: 0 8px 30px #1422192b; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+		.toast.show { opacity: 1; transform: translateY(0); }
+		@media (max-width: 820px) {
+			.page { padding: 35px 4vw 30px; }
+			.workspace { grid-template-columns: 1fr; }
+			.sidebar { min-height: auto; }
+			.route-list { display: flex; gap: 7px; overflow-x: auto; padding: 8px 10px 12px; scrollbar-width: thin; }
+			.route-entry { flex: 0 0 205px; min-width: 0; }
+			.remove-route { opacity: 1; }
+			.add-route { margin-top: 0; }
+			.side-foot { display: none; }
+			.map-frame, .map-frame iframe { min-height: 360px; }
+		}
+		@media (max-width: 520px) {
+			.topbar { min-height: 60px; padding: 0 20px; }
+			.top-note { font-size: 9px; }
+			.page { padding: 28px 14px 22px; }
+			.intro { display: block; margin-bottom: 21px; }
+			h1 { font-size: 35px; }
+			.intro-copy { margin-top: 12px; font-size: 13px; }
+			.workspace { gap: 12px; }
+			.side-head { padding: 16px 16px 12px; }
+			.map-heading { min-height: 68px; padding: 13px 15px; }
+			.map-title h2 { font-size: 15px; }
+			.open-map { padding: 8px 9px; font-size: 10px; }
+			.map-frame { aspect-ratio: 1 / 1.04; min-height: 350px; }
+			.map-frame iframe { min-height: 350px; }
+			.stats { flex-wrap: wrap; }
+			.stat { min-width: 0; flex: 1; padding: 14px 15px; }
+			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
+			.dialog-head, .route-form { padding-left: 19px; padding-right: 19px; }
+		}
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
+			<span class="brand-mark" aria-hidden="true">↗</span>
+			<span class="brand-name">waymark</span>
+		</a>
+		<span class="top-note">Your route library</span>
+	</header>
+
+	<main class="page">
+		<section class="intro" aria-labelledby="page-title">
+			<div>
+				<p class="eyebrow">A little farther, every day</p>
+				<h1 id="page-title">Routes worth keeping.</h1>
+			</div>
+			<p class="intro-copy">A home for the paths you find, plan, and want to find again.</p>
+		</section>
+
+		<section class="workspace" aria-label="Saved routes and route map">
+			<aside class="sidebar" aria-label="Route library">
+				<div class="side-head">
+					<h2>Saved routes</h2>
+					<span class="count" id="route-count">01 ROUTE</span>
+				</div>
+				<div class="route-list" id="route-list" role="list"></div>
+				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
+				<div class="side-foot">YOUR COLLECTION<br>KEPT ON THIS DEVICE</div>
+			</aside>
+
+			<section class="map-panel" aria-label="Selected route">
+				<div class="map-heading">
+					<div class="map-title">
+						<h2 id="active-name">Riverside Loop</h2>
+						<p id="active-kind">WALK · ROUTE 01</p>
+					</div>
+					<a class="open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
+				</div>
+				<div class="map-frame" id="map-frame">
+					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
+					<div class="map-empty" id="map-empty">
+						<div class="empty-inner"><strong>Route saved.</strong><span>This map link can’t be embedded here. Open the map to view it on its original site.</span></div>
+					</div>
+				</div>
+				<div class="stats" aria-label="Route details">
+					<div class="stat"><span class="stat-label">Distance</span><span class="stat-value" id="active-distance">11.26 km</span></div>
+					<div class="stat"><span class="stat-label">Route type</span><span class="stat-value" id="active-type">Loop</span></div>
+					<div class="credit">Map data © OpenStreetMap contributors</div>
+				</div>
+			</section>
+		</section>
+	</main>
+
+	<dialog id="route-dialog" aria-labelledby="dialog-title">
+		<div class="dialog-head">
+			<div><h2 id="dialog-title">Add a route</h2><p>Paste a map link or the full iframe embed.</p></div>
+			<button class="close-dialog" id="close-dialog" type="button" aria-label="Close">×</button>
+		</div>
+		<form class="route-form" id="route-form">
+			<div class="field">
+				<label for="route-name-input">Route name</label>
+				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" required>
+			</div>
+			<div class="field">
+				<label for="route-url-input">Map URL or iframe</label>
+				<textarea id="route-url-input" name="url" placeholder="Paste an https:// map URL or the full <iframe> code" required></textarea>
+				<span class="field-hint">The map must allow embedding. Your route stays saved on this device.</span>
+			</div>
+			<div class="field">
+				<label for="route-distance-input">Distance in km <span style="color:#879087;text-transform:none;letter-spacing:0">(optional)</span></label>
+				<input id="route-distance-input" name="distance" type="number" min="0" step="0.01" placeholder="e.g. 5.4">
+			</div>
+			<p class="form-error" id="form-error" role="alert"></p>
+			<div class="form-actions">
+				<button id="cancel-dialog" type="button">Cancel</button>
+				<button class="save-route" type="submit">Save route</button>
+			</div>
+		</form>
+	</dialog>
+	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+	<script>
+		const starterRoute = {
+			id: "starter-route",
+			name: "Riverside Loop",
+			url: document.getElementById("route-map").getAttribute("src"),
+			distance: 11.26,
+			kind: "Walk",
+			type: "Loop"
+		};
+		const storageKey = "waymark-routes-v1";
+		const routeList = document.getElementById("route-list");
+		const mapFrame = document.getElementById("route-map");
+		const mapEmpty = document.getElementById("map-empty");
+		const mapLink = document.getElementById("open-map");
+		const routeDialog = document.getElementById("route-dialog");
+		let routes = loadRoutes();
+		let selectedId = routes[0].id;
+		let toastTimer;
+
+		function loadRoutes() {
+			try {
+				const saved = JSON.parse(localStorage.getItem(storageKey));
+				if (Array.isArray(saved) && saved.length) return saved;
+			} catch (error) {
+				return [starterRoute];
+			}
+			return [starterRoute];
+		}
+
+		function persistRoutes() {
+			try {
+				localStorage.setItem(storageKey, JSON.stringify(routes));
+			} catch (error) {
+				showToast("Could not save routes in this browser.");
+			}
+		}
+
+		function renderRoutes() {
+			routeList.replaceChildren();
+			routes.forEach((route, index) => {
+				const entry = document.createElement("div");
+				entry.className = "route-entry";
+				entry.setAttribute("role", "listitem");
+				const item = document.createElement("button");
+				item.type = "button";
+				item.className = `route-item${route.id === selectedId ? " active" : ""}`;
+				item.setAttribute("aria-pressed", String(route.id === selectedId));
+				item.setAttribute("aria-label", `${route.name}${route.distance ? `, ${Number(route.distance).toFixed(2)} kilometers` : ""}`);
+
+				const top = document.createElement("span");
+				top.className = "route-top";
+				const name = document.createElement("span");
+				name.className = "route-name";
+				name.textContent = route.name;
+				const distance = document.createElement("span");
+				distance.className = "route-distance";
+				distance.textContent = route.distance ? `${Number(route.distance).toFixed(2)} km` : "— km";
+				top.append(name, distance);
+
+				const sub = document.createElement("span");
+				sub.className = "route-sub";
+				const dot = document.createElement("span");
+				dot.className = "route-dot";
+				dot.setAttribute("aria-hidden", "true");
+				sub.append(dot, document.createTextNode(`${route.kind || "Route"} · ${String(index + 1).padStart(2, "0")}`));
+				item.append(top, sub);
+				entry.append(item);
+
+				if (route.id !== starterRoute.id) {
+					const remove = document.createElement("button");
+					remove.type = "button";
+					remove.className = "remove-route";
+					remove.textContent = "Remove";
+					remove.setAttribute("aria-label", `Remove ${route.name}`);
+					remove.addEventListener("click", (event) => {
+						event.stopPropagation();
+						deleteRoute(route.id);
+					});
+					entry.append(remove);
+				}
+				item.addEventListener("click", () => selectRoute(route.id));
+				routeList.append(entry);
+			});
+			const total = routes.length;
+			document.getElementById("route-count").textContent = `${String(total).padStart(2, "0")} ${total === 1 ? "ROUTE" : "ROUTES"}`;
+		}
+
+		function selectRoute(id) {
+			const route = routes.find((entry) => entry.id === id);
+			if (!route) return;
+			selectedId = id;
+			renderRoutes();
+			document.getElementById("active-name").textContent = route.name;
+			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routes.indexOf(route) + 1).padStart(2, "0")}`;
+			document.getElementById("active-distance").textContent = route.distance ? `${Number(route.distance).toFixed(2)} km` : "Not specified";
+			document.getElementById("active-type").textContent = route.type || "Route";
+			mapFrame.src = route.url;
+			mapLink.href = route.url;
+			mapFrame.hidden = false;
+			mapEmpty.style.display = "none";
+			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
+			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
+		}
+
+		function deleteRoute(id) {
+			routes = routes.filter((route) => route.id !== id);
+			persistRoutes();
+			if (selectedId === id) selectedId = routes[0].id;
+			renderRoutes();
+			if (selectedId) selectRoute(selectedId);
+			showToast("Route removed.");
+		}
+
+		function showToast(message) {
+			const toast = document.getElementById("toast");
+			toast.textContent = message;
+			toast.classList.add("show");
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+		}
+
+		function getMapUrl(value) {
+			const input = value.trim();
+			let source = input;
+			if (input.includes("<iframe")) {
+				const parsed = new DOMParser().parseFromString(input, "text/html");
+				source = parsed.querySelector("iframe")?.getAttribute("src") || "";
+			}
+			const url = new URL(source);
+			if (url.protocol !== "https:") throw new Error("Use a secure https:// map link.");
+			return url.href;
+		}
+
+		document.getElementById("add-route").addEventListener("click", () => {
+			document.getElementById("form-error").textContent = "";
+			routeDialog.showModal();
+			document.getElementById("route-name-input").focus();
+		});
+		document.getElementById("close-dialog").addEventListener("click", () => routeDialog.close());
+		document.getElementById("cancel-dialog").addEventListener("click", () => routeDialog.close());
+		routeDialog.addEventListener("click", (event) => {
+			if (event.target === routeDialog) routeDialog.close();
+		});
+		document.getElementById("route-form").addEventListener("submit", (event) => {
+			event.preventDefault();
+			const form = event.currentTarget;
+			const errorElement = document.getElementById("form-error");
+			try {
+				const url = getMapUrl(form.elements.url.value);
+				const distanceValue = form.elements.distance.value;
+				const route = {
+					id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+					name: form.elements.name.value.trim(),
+					url,
+					distance: distanceValue ? Number(distanceValue) : null,
+					kind: "Route",
+					type: "Route"
+				};
+				if (!route.name) throw new Error("Add a name for this route.");
+				routes.push(route);
+				persistRoutes();
+				selectRoute(route.id);
+				form.reset();
+				routeDialog.close();
+				showToast("Route added to your library.");
+			} catch (error) {
+				errorElement.textContent = error instanceof TypeError ? "Enter a valid map URL or iframe embed." : error.message;
+			}
+		});
+
+		renderRoutes();
+		selectRoute(selectedId);
+	</script>
+</body>
+</html>
