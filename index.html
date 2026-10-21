@@ -59,10 +59,11 @@
 		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
 		.count { color: var(--muted); font: 11px var(--mono); }
 		.route-list { padding: 8px; }
-		.route-category + .route-category { border-top: 1px solid var(--line); }
-		.route-category-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px 7px; }
-		.route-category-head h3 { margin: 0; font-size: 12px; font-weight: 700; }
-		.route-category .route-list { padding-top: 4px; }
+		.route-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+		.route-tab[aria-pressed="true"] { border-bottom-color: var(--coral); color: var(--ink); }
+		.route-tab:focus-visible { outline: 2px solid var(--forest); outline-offset: -3px; }
+		.route-tab .count { font-size: 9px; }
 		.route-item {
 			position: relative;
 			width: 100%;
@@ -102,6 +103,7 @@
 			cursor: pointer;
 			transition: border-color .18s ease, background .18s ease;
 		}
+		.add-route[hidden] { display: none; }
 		.add-route:hover { border-color: #7e947e; background: #f7f9f4; }
 		.plus { font-size: 20px; font-weight: 400; line-height: 1; }
 		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: #879087; font: 10px/1.6 var(--mono); letter-spacing: .035em; }
@@ -199,21 +201,16 @@
 
 		<section class="workspace" aria-label="Route library and route map">
 			<aside class="sidebar" aria-label="Route library">
-				<section class="route-category" aria-labelledby="saved-routes-heading">
-					<div class="route-category-head">
-						<h3 id="saved-routes-heading">Saved routes</h3>
-						<span class="count" id="route-count">00 ROUTES</span>
-					</div>
-					<div class="route-list" id="route-list" role="list"></div>
-					<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
-				</section>
-				<section class="route-category" aria-labelledby="public-routes-heading">
-					<div class="route-category-head">
-						<h3 id="public-routes-heading">Public routes</h3>
-						<span class="count" id="public-route-count">01 ROUTE</span>
-					</div>
-					<div class="route-list" id="public-route-list" role="list"></div>
-				</section>
+				<div class="route-tabs" role="group" aria-label="Route categories">
+					<button class="route-tab" id="saved-routes-tab" type="button" aria-controls="route-list" aria-pressed="false">
+						Saved routes <span class="count" id="route-count">00</span>
+					</button>
+					<button class="route-tab" id="public-routes-tab" type="button" aria-controls="route-list" aria-pressed="false">
+						Public routes <span class="count" id="public-route-count">01</span>
+					</button>
+				</div>
+				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
+				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
 				<div class="side-foot">YOUR COLLECTION<br>KEPT ON THIS DEVICE</div>
 			</aside>
 
@@ -279,13 +276,16 @@
 		};
 		const storageKey = "waymark-routes-v1";
 		const routeList = document.getElementById("route-list");
-		const publicRouteList = document.getElementById("public-route-list");
+		const savedRoutesTab = document.getElementById("saved-routes-tab");
+		const publicRoutesTab = document.getElementById("public-routes-tab");
+		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
 		const routeDialog = document.getElementById("route-dialog");
 		let routes = loadRoutes();
-		let selectedId = routes[0].id;
+		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
+		let activeCategory = selectedId === starterRoute.id ? "public" : "saved";
 		let toastTimer;
 
 		function loadRoutes() {
@@ -308,13 +308,15 @@
 
 		function renderRoutes() {
 			routeList.replaceChildren();
-			publicRouteList.replaceChildren();
 			const savedRoutes = routes.filter((route) => route.id !== starterRoute.id);
-			renderRouteList(savedRoutes, routeList);
-			renderRouteList([starterRoute], publicRouteList);
-			const savedTotal = savedRoutes.length;
-			document.getElementById("route-count").textContent = `${String(savedTotal).padStart(2, "0")} ${savedTotal === 1 ? "ROUTE" : "ROUTES"}`;
-			document.getElementById("public-route-count").textContent = "01 ROUTE";
+			document.getElementById("route-count").textContent = String(savedRoutes.length).padStart(2, "0");
+			document.getElementById("public-route-count").textContent = "01";
+			const showingSavedRoutes = activeCategory === "saved";
+			const categoryRoutes = showingSavedRoutes ? savedRoutes : [starterRoute];
+			renderRouteList(categoryRoutes, routeList);
+			savedRoutesTab.setAttribute("aria-pressed", String(showingSavedRoutes));
+			publicRoutesTab.setAttribute("aria-pressed", String(!showingSavedRoutes));
+			addRouteButton.hidden = !showingSavedRoutes;
 		}
 
 		function renderRouteList(categoryRoutes, list) {
@@ -368,6 +370,7 @@
 			const route = routes.find((entry) => entry.id === id);
 			if (!route) return;
 			selectedId = id;
+			activeCategory = route.id === starterRoute.id ? "public" : "saved";
 			renderRoutes();
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
@@ -381,6 +384,15 @@
 			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
+
+		savedRoutesTab.addEventListener("click", () => {
+			activeCategory = "saved";
+			renderRoutes();
+		});
+		publicRoutesTab.addEventListener("click", () => {
+			activeCategory = "public";
+			renderRoutes();
+		});
 
 		function deleteRoute(id) {
 			routes = routes.filter((route) => route.id !== id);
