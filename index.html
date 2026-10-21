@@ -1,28 +1,136 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="forest">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="#121a16">
+	<meta name="theme-color" content="#edf3ed">
 	<title>Waymark — route library</title>
 	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 	<style>
 		:root {
-			color-scheme: dark;
-			--ink: #edf2eb;
-			--muted: #9ba99f;
-			--paper: #121a16;
-			--white: #1c2721;
-			--line: #35443b;
-			--forest: #18251f;
-			--leaf: #d4f06b;
-			--coral: #ff8069;
-			--mono: "DM Mono", monospace;
-			--sans: "DM Sans", sans-serif;
+			color-scheme: light;
+			--ink: #21342b;
+			--muted: #718078;
+			--paper: #f3f6f2;
+			--white: #ffffff;
+			--line: #dce5dd;
+			--forest: #214a38;
+			--leaf: #b7dc88;
+			--coral: #d9785e;
+			--topbar-text: #f7fbf6;
+			--eyebrow: #668071;
+			--intro-copy: #6d7d73;
+			--hover: #f1f6f0;
+			--active: #edf5e9;
+			--active-border: #c7dcb8;
+			--route-distance: #627d69;
+			--secondary-text: #718078;
+			--quiet-text: #87958c;
+			--button-text: #355342;
+			--button-bg: #f7f9f6;
+			--input-bg: #fbfcfa;
+			--input-border: #d5dfd7;
+			--field-label: #617268;
+			--focus-ring: #b7dc8855;
+			--map-bg: #e5ece5;
+			--empty-copy: #718078;
+			--stat-value: #314a3a;
+			--dialog-border: #dce5dd;
+			--backdrop: #20342bb8;
+			--shadow: 0 18px 55px #23352a16;
+			--danger: #bc5945;
+			--mono: "IBM Plex Mono", monospace;
+			--sans: "Manrope", sans-serif;
 			--serif: "Fraunces", Georgia, serif;
+		}
+
+		:root[data-theme="forest"] {
+			--paper: #edf3ed;
+			--white: #fbfdf9;
+			--line: #d6e2d7;
+			--forest: #1d4635;
+			--leaf: #b7dc88;
+			--coral: #d9785e;
+			--hover: #f0f6ef;
+			--active: #e9f2e6;
+			--active-border: #c0d8b5;
+			--map-bg: #e1ebe1;
+		}
+
+		:root[data-theme="dark"] {
+			color-scheme: dark;
+			--ink: #edf3ed;
+			--muted: #a4b2a8;
+			--paper: #151c18;
+			--white: #202b24;
+			--line: #3a4a40;
+			--forest: #1c3025;
+			--leaf: #c0e584;
+			--coral: #f08b70;
+			--topbar-text: #f7fbf6;
+			--eyebrow: #a7b8aa;
+			--intro-copy: #abb8ae;
+			--hover: #2a3930;
+			--active: #2a3b30;
+			--active-border: #526c52;
+			--route-distance: #c0d0b7;
+			--secondary-text: #a9b7ad;
+			--quiet-text: #9ba99f;
+			--button-text: #dce8de;
+			--button-bg: #27352c;
+			--input-bg: #19231c;
+			--input-border: #46574a;
+			--field-label: #c0cdc2;
+			--focus-ring: #c0e58444;
+			--map-bg: #293a30;
+			--empty-copy: #b1beb3;
+			--stat-value: #e1ebde;
+			--dialog-border: #425148;
+			--backdrop: #101a14d9;
+			--shadow: 0 24px 80px #0009;
+			--danger: #ff9a84;
+		}
+
+		:root[data-theme="system"] {
+			color-scheme: light;
+		}
+
+		@media (prefers-color-scheme: dark) {
+			:root[data-theme="system"] {
+				color-scheme: dark;
+				--ink: #edf3ed;
+				--muted: #a4b2a8;
+				--paper: #151c18;
+				--white: #202b24;
+				--line: #3a4a40;
+				--forest: #1c3025;
+				--leaf: #c0e584;
+				--coral: #f08b70;
+				--eyebrow: #a7b8aa;
+				--intro-copy: #abb8ae;
+				--hover: #2a3930;
+				--active: #2a3b30;
+				--active-border: #526c52;
+				--route-distance: #c0d0b7;
+				--secondary-text: #a9b7ad;
+				--quiet-text: #9ba99f;
+				--button-text: #dce8de;
+				--button-bg: #27352c;
+				--input-bg: #19231c;
+				--input-border: #46574a;
+				--field-label: #c0cdc2;
+				--focus-ring: #c0e58444;
+				--map-bg: #293a30;
+				--empty-copy: #b1beb3;
+				--stat-value: #e1ebde;
+				--dialog-border: #425148;
+				--backdrop: #101a14d9;
+				--shadow: 0 24px 80px #0009;
+				--danger: #ff9a84;
+			}
 		}
 
 		* { box-sizing: border-box; }
@@ -33,37 +141,43 @@
 			color: var(--ink);
 			font-family: var(--sans);
 			-webkit-font-smoothing: antialiased;
+			transition: background-color .2s ease, color .2s ease;
 		}
 		button, input, textarea { font: inherit; }
 		button { color: inherit; }
 		.topbar {
-			min-height: 72px;
+			min-height: 76px;
 			padding: 0 5.2vw;
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
 			background: var(--forest);
-			color: white;
+			color: var(--topbar-text);
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
 		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; }
 		.brand-name { font-size: 16px; }
-		.top-note { display: flex; align-items: center; gap: 9px; color: #d3ddd5; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+		.topbar-actions { display: flex; align-items: center; gap: 22px; }
+		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
 		.top-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); }
+		.settings-button { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid #ffffff35; border-radius: 12px; background: #ffffff10; color: var(--topbar-text); cursor: pointer; transition: background .18s ease, border-color .18s ease; }
+		.settings-button:hover { border-color: #ffffff75; background: #ffffff20; }
+		.settings-button:focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; }
+		.settings-button svg { width: 18px; height: 18px; }
 		.page { max-width: 1480px; margin: auto; padding: 48px 5.2vw 44px; }
-		.intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
-		.eyebrow { margin: 0 0 11px; color: #a6b4a8; font: 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
-		h1 { margin: 0; font: 500 clamp(32px, 4vw, 48px)/1.05 var(--serif); letter-spacing: 0; }
-		.intro-copy { max-width: 300px; margin: 0 0 4px; color: #a3afa5; font-size: 14px; line-height: 1.6; }
+		.intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
+		.eyebrow { margin: 0 0 11px; color: var(--eyebrow); font: 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+		h1 { margin: 0; font: 500 clamp(32px, 4vw, 48px)/1.05 var(--serif); letter-spacing: -.025em; }
+		.intro-copy { max-width: 300px; margin: 0 0 4px; color: var(--intro-copy); font-size: 14px; line-height: 1.7; }
 		.workspace { display: grid; grid-template-columns: minmax(255px, 310px) minmax(0, 1fr); gap: 20px; align-items: stretch; }
-		.sidebar, .map-panel { background: var(--white); border: 1px solid var(--line); border-radius: 5px; }
+		.sidebar, .map-panel { background: var(--white); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
 		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
 		.count { color: var(--muted); font: 11px var(--mono); }
-		.route-list { padding: 8px; }
+		.route-list { padding: 10px; }
 		.route-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
 		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
 		.route-tabs[data-active-category="public"]::after { transform: translateX(100%); }
-		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { font-size: 9px; }
@@ -72,24 +186,24 @@
 			width: 100%;
 			padding: 15px 12px;
 			border: 1px solid transparent;
-			border-radius: 3px;
+			border-radius: 9px;
 			background: transparent;
 			text-align: left;
 			cursor: pointer;
 			transition: background .18s ease, border-color .18s ease, transform .18s ease;
 		}
 		.route-entry { position: relative; }
-		.route-item:hover { background: #26352d; }
-		.route-item.active { border-color: #536646; background: #29382d; }
+		.route-item:hover { background: var(--hover); }
+		.route-item.active { border-color: var(--active-border); background: var(--active); }
 		.route-item.active::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; background: var(--coral); border-radius: 0 3px 3px 0; }
 		.route-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 		.route-name { overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-		.route-distance { flex: none; color: #c0d0b7; font: 11px var(--mono); }
-		.route-sub { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: #9ba99f; font-size: 11px; }
+		.route-distance { flex: none; color: var(--route-distance); font: 11px var(--mono); }
+		.route-sub { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--secondary-text); font-size: 11px; }
 		.route-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
-		.remove-route { position: absolute; right: 10px; bottom: 11px; padding: 3px 5px; border: 0; background: transparent; color: #a8b3aa; font-size: 11px; cursor: pointer; opacity: 0; }
+		.remove-route { position: absolute; right: 10px; bottom: 11px; padding: 3px 5px; border: 0; background: transparent; color: var(--quiet-text); font-size: 11px; cursor: pointer; opacity: 0; }
 		.route-entry:hover .remove-route, .route-entry:focus-within .remove-route { opacity: 1; }
-		.remove-route:hover { color: #b4412c; }
+		.remove-route:hover { color: var(--danger); }
 		.add-route {
 			display: flex;
 			align-items: center;
@@ -97,58 +211,76 @@
 			gap: 9px;
 			margin: 10px 16px 20px;
 			min-height: 43px;
-			border: 1px dashed #526158;
-			border-radius: 3px;
+			border: 1px dashed var(--line);
+			border-radius: 10px;
 			background: transparent;
-			color: #d1dfd2;
+			color: var(--button-text);
 			font-size: 13px;
 			font-weight: 600;
 			cursor: pointer;
 			transition: border-color .18s ease, background .18s ease;
 		}
 		.add-route[hidden] { display: none; }
-		.add-route:hover { border-color: #9eb294; background: #26352d; }
+		.add-route:hover { border-color: var(--route-distance); background: var(--hover); }
 		.plus { font-size: 20px; font-weight: 400; line-height: 1; }
-		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: #9ba99f; font: 10px/1.6 var(--mono); letter-spacing: .035em; }
+		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px/1.6 var(--mono); letter-spacing: .035em; }
 		.map-panel { min-width: 0; overflow: hidden; }
 		.map-heading { min-height: 75px; padding: 17px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
 		.map-title { min-width: 0; }
 		.map-title h2 { margin: 0 0 5px; overflow: hidden; font-size: 17px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
-		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 3px; color: #d4e0d5; font-size: 11px; font-weight: 600; text-decoration: none; transition: background .16s ease; }
-		.open-map:hover { background: #29382f; }
-		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: #26352d; }
+		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; transition: background .16s ease; }
+		.open-map:hover { background: var(--hover); }
+		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
-		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, #ffffff12 14.2% 14.5%, transparent 14.7% 23%, #ffffff12 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, #ffffff12 19.2% 19.5%, transparent 19.7% 29%, #ffffff12 29.2% 29.5%, transparent 29.7%), #26352d; text-align: center; }
+		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); text-align: center; }
 		.empty-inner { max-width: 280px; }
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
-		.empty-inner span { color: #b1beb3; font-size: 13px; line-height: 1.6; }
+		.empty-inner span { color: var(--empty-copy); font-size: 13px; line-height: 1.6; }
 		.stats { display: flex; align-items: stretch; border-top: 1px solid var(--line); }
 		.stat { min-width: 140px; padding: 17px 22px; }
 		.stat + .stat { border-left: 1px solid var(--line); }
-		.stat-label { display: block; margin-bottom: 5px; color: #9ba99f; font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-		.stat-value { color: #e1ebde; font: 500 17px var(--serif); }
-		.credit { margin-left: auto; align-self: center; padding: 0 22px; color: #9ba99f; font-size: 10px; text-align: right; }
-		dialog { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid #425148; border-radius: 5px; background: var(--white); color: var(--ink); box-shadow: 0 24px 80px #0009; }
-		dialog::backdrop { background: #17241dcc; backdrop-filter: blur(3px); }
+		.stat-label { display: block; margin-bottom: 5px; color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.stat-value { color: var(--stat-value); font: 500 17px var(--serif); }
+		.credit { margin-left: auto; align-self: center; padding: 0 22px; color: var(--quiet-text); font-size: 10px; text-align: right; }
+		dialog { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--dialog-border); border-radius: 16px; background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+		dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(5px); }
 		.dialog-head { display: flex; justify-content: space-between; align-items: start; padding: 24px 25px 18px; border-bottom: 1px solid var(--line); }
 		.dialog-head h2 { margin: 0; font: 500 25px var(--serif); }
 		.dialog-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
-		.close-dialog { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 3px; background: #243129; font-size: 18px; cursor: pointer; }
+		.close-dialog { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--button-bg); font-size: 18px; cursor: pointer; }
 		.route-form { display: grid; gap: 16px; padding: 21px 25px 25px; }
 		.field { display: grid; gap: 7px; }
-		.field label { color: #c0cdc2; font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid #425148; border-radius: 3px; outline: none; background: #151f19; color: var(--ink); font-size: 13px; }
-		.field input:focus, .field textarea:focus { border-color: #a5bd87; box-shadow: 0 0 0 3px #d4f06b33; }
+		.field label { color: var(--field-label); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--input-border); border-radius: 9px; outline: none; background: var(--input-bg); color: var(--ink); font-size: 13px; }
+		.field input:focus, .field textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
 		.field textarea { min-height: 102px; resize: vertical; line-height: 1.5; }
-		.field-hint { color: #9ba99f; font-size: 11px; line-height: 1.4; }
-		.form-error { min-height: 16px; margin: -5px 0 0; color: #ff9a84; font-size: 12px; }
+		.field-hint { color: var(--quiet-text); font-size: 11px; line-height: 1.4; }
+		.form-error { min-height: 16px; margin: -5px 0 0; color: var(--danger); font-size: 12px; }
 		.form-actions { display: flex; justify-content: flex-end; gap: 9px; }
-		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 3px; background: #243129; font-size: 12px; font-weight: 600; cursor: pointer; }
-		.form-actions .save-route { border-color: var(--leaf); background: var(--leaf); color: #18251f; }
-		.form-actions .save-route:hover { background: #e0f58e; }
-		.toast { position: fixed; right: 22px; bottom: 20px; z-index: 2; padding: 12px 16px; border-radius: 3px; background: var(--forest); color: white; font-size: 12px; box-shadow: 0 8px 30px #1422192b; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); font-size: 12px; font-weight: 700; cursor: pointer; }
+		.form-actions .create-route { display: inline-flex; align-items: center; min-height: 39px; margin-right: auto; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 12px; font-weight: 700; text-decoration: none; }
+		.form-actions .create-route:hover { background: var(--hover); }
+		.form-actions .save-route { border-color: var(--leaf); background: var(--leaf); color: #20352a; }
+		.form-actions .save-route:hover { filter: brightness(1.04); }
+		.toast { position: fixed; right: 22px; bottom: 20px; z-index: 2; padding: 12px 16px; border-radius: 10px; background: var(--forest); color: var(--topbar-text); font-size: 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 		.toast.show { opacity: 1; transform: translateY(0); }
+		.settings-dialog { width: min(430px, calc(100vw - 32px)); }
+		.theme-options { display: grid; gap: 9px; padding: 20px 25px 25px; }
+		.theme-option { position: relative; }
+		.theme-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+		.theme-option label { display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 11px; background: var(--white); cursor: pointer; transition: border-color .16s ease, background .16s ease; }
+		.theme-option label:hover { background: var(--hover); }
+		.theme-option input:checked + label { border-color: var(--route-distance); background: var(--active); }
+		.theme-option input:focus-visible + label { outline: 2px solid var(--coral); outline-offset: 2px; }
+		.theme-swatch { width: 28px; height: 28px; flex: none; border: 1px solid var(--line); border-radius: 9px; }
+		.theme-swatch.forest { background: linear-gradient(135deg, #1d4635 0 50%, #b7dc88 50%); }
+		.theme-swatch.dark { background: linear-gradient(135deg, #151c18 0 50%, #c0e584 50%); }
+		.theme-swatch.light { background: linear-gradient(135deg, #f3f6f2 0 50%, #d9785e 50%); }
+		.theme-swatch.system { background: linear-gradient(135deg, #f3f6f2 0 50%, #202b24 50%); }
+		.theme-option-copy { display: grid; gap: 3px; }
+		.theme-option-copy strong { font-size: 13px; font-weight: 700; }
+		.theme-option-copy span { color: var(--muted); font-size: 11px; }
 		.route-list.category-forward { animation: category-forward .28s cubic-bezier(.2,.7,.25,1) both; }
 		.route-list.category-back { animation: category-back .28s cubic-bezier(.2,.7,.25,1) both; }
 		@keyframes category-forward { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
@@ -167,6 +299,8 @@
 		@media (max-width: 520px) {
 			.topbar { min-height: 60px; padding: 0 20px; }
 			.top-note { font-size: 9px; }
+			.topbar-actions { gap: 12px; }
+			.settings-button { width: 35px; height: 35px; border-radius: 10px; }
 			.page { padding: 28px 14px 22px; }
 			.intro { display: block; margin-bottom: 21px; }
 			h1 { font-size: 35px; }
@@ -181,7 +315,7 @@
 			.stats { flex-wrap: wrap; }
 			.stat { min-width: 0; flex: 1; padding: 14px 15px; }
 			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
-			.dialog-head, .route-form { padding-left: 19px; padding-right: 19px; }
+			.dialog-head, .route-form, .theme-options { padding-left: 19px; padding-right: 19px; }
 		}
 		@media (prefers-reduced-motion: reduce) {
 			*, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -194,7 +328,15 @@
 					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<span class="brand-name">waymark</span>
 		</a>
-		<span class="top-note">Your route library</span>
+		<div class="topbar-actions">
+			<span class="top-note">Your route library</span>
+			<button class="settings-button" id="settings-button" type="button" aria-label="Open appearance settings" aria-haspopup="dialog" aria-controls="settings-dialog" title="Appearance settings">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"></path>
+					<path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.55 2.55l-.1-.1a1.8 1.8 0 0 0-3.07 1.27v.28a1.8 1.8 0 1 1-3.6 0v-.15a1.8 1.8 0 0 0-3.07-1.27l-.1.1a1.8 1.8 0 1 1-2.55-2.55l.1-.1a1.8 1.8 0 0 0-1.27-3.07h-.28a1.8 1.8 0 1 1 0-3.6h.15a1.8 1.8 0 0 0 1.27-3.07l-.1-.1a1.8 1.8 0 1 1 2.55-2.55l.1.1a1.8 1.8 0 0 0 3.07-1.27v-.28a1.8 1.8 0 1 1 3.6 0v.15a1.8 1.8 0 0 0 3.07 1.27l.1-.1a1.8 1.8 0 1 1 2.55 2.55l-.1.1a1.8 1.8 0 0 0 1.27 3.07h.28a1.8 1.8 0 1 1 0 3.6h-.15A1.8 1.8 0 0 0 19.4 15Z"></path>
+				</svg>
+			</button>
+		</div>
 	</header>
 
 	<main class="page">
@@ -261,10 +403,35 @@
 			</div>
 			<p class="form-error" id="form-error" role="alert"></p>
 			<div class="form-actions">
+				<a class="create-route" href="https://onthegomap.com/" target="_blank" rel="noopener noreferrer">Create a Route</a>
 				<button id="cancel-dialog" type="button">Cancel</button>
 				<button class="save-route" type="submit">Save route</button>
 			</div>
 		</form>
+	</dialog>
+	<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
+		<div class="dialog-head">
+			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waymark looks on this device.</p></div>
+			<button class="close-dialog" id="close-settings" type="button" aria-label="Close appearance settings">×</button>
+		</div>
+		<div class="theme-options" role="radiogroup" aria-label="Color theme">
+			<div class="theme-option">
+				<input id="theme-forest" name="theme" type="radio" value="forest">
+				<label for="theme-forest"><span class="theme-swatch forest" aria-hidden="true"></span><span class="theme-option-copy"><strong>Forest</strong><span>Soft greens, made for the outdoors</span></span></label>
+			</div>
+			<div class="theme-option">
+				<input id="theme-dark" name="theme" type="radio" value="dark">
+				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"></span><span class="theme-option-copy"><strong>Dark</strong><span>A calm, low-light palette</span></span></label>
+			</div>
+			<div class="theme-option">
+				<input id="theme-light" name="theme" type="radio" value="light">
+				<label for="theme-light"><span class="theme-swatch light" aria-hidden="true"></span><span class="theme-option-copy"><strong>Light</strong><span>Clean and bright, whatever your system</span></span></label>
+			</div>
+			<div class="theme-option">
+				<input id="theme-system" name="theme" type="radio" value="system">
+				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"></span><span class="theme-option-copy"><strong>System</strong><span>Follow your device appearance</span></span></label>
+			</div>
+		</div>
 	</dialog>
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -278,6 +445,7 @@
 			type: "Loop"
 		};
 		const storageKey = "waymark-routes-v1";
+		const themeStorageKey = "waymark-theme-v1";
 		const routeList = document.getElementById("route-list");
 		const routeTabs = document.getElementById("route-tabs");
 		const savedRoutesTab = document.getElementById("saved-routes-tab");
@@ -287,10 +455,43 @@
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
 		const routeDialog = document.getElementById("route-dialog");
+		const settingsDialog = document.getElementById("settings-dialog");
+		const themeNames = ["forest", "dark", "light", "system"];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
 		let activeCategory = selectedId === starterRoute.id ? "public" : "saved";
 		let toastTimer;
+
+		function applyTheme(theme) {
+			document.documentElement.dataset.theme = theme;
+			const selectedTheme = settingsDialog.querySelector(`input[name="theme"][value="${theme}"]`);
+			if (selectedTheme) selectedTheme.checked = true;
+			document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue("--paper").trim();
+		}
+
+		function loadTheme() {
+			try {
+				const savedTheme = localStorage.getItem(themeStorageKey);
+				return themeNames.includes(savedTheme) ? savedTheme : "forest";
+			} catch (error) {
+				showToast("Could not load saved appearance settings.");
+				return "forest";
+			}
+		}
+
+		function saveTheme(theme) {
+			applyTheme(theme);
+			try {
+				localStorage.setItem(themeStorageKey, theme);
+			} catch (error) {
+				showToast("Could not save appearance settings in this browser.");
+			}
+		}
+
+		applyTheme(loadTheme());
+		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+			if (document.documentElement.dataset.theme === "system") applyTheme("system");
+		});
 
 		function loadRoutes() {
 			try {
@@ -421,6 +622,17 @@
 			clearTimeout(toastTimer);
 			toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
 		}
+
+		document.getElementById("settings-button").addEventListener("click", () => {
+			settingsDialog.showModal();
+			settingsDialog.querySelector('input[name="theme"]:checked')?.focus();
+		});
+		document.getElementById("close-settings").addEventListener("click", () => settingsDialog.close());
+		settingsDialog.addEventListener("change", (event) => {
+			if (event.target instanceof HTMLInputElement && event.target.name === "theme" && themeNames.includes(event.target.value)) {
+				saveTheme(event.target.value);
+			}
+		});
 
 		function getMapUrl(value) {
 			const input = value.trim();
