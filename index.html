@@ -273,7 +273,7 @@
 			transition: background .18s ease, border-color .18s ease, transform .18s ease;
 		}
 		.route-entry { position: relative; }
-		.route-entry.has-actions .route-item { padding-bottom: 34px; }
+		.route-entry.has-actions .route-sub { padding-right: 100px; }
 		.route-item:hover { background: var(--hover); }
 		.route-item.active { border-color: var(--active-border); background: var(--active); }
 		.route-item.active::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; background: var(--coral); border-radius: 0 3px 3px 0; }
@@ -282,11 +282,12 @@
 		.route-distance { flex: none; color: var(--route-distance); font: 11px var(--mono); }
 		.route-sub { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--secondary-text); font-size: 11px; }
 		.route-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
-		.route-actions { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 8px; }
+		.route-actions { position: absolute; right: 10px; bottom: 14px; display: flex; gap: 8px; }
 		.route-action { padding: 3px 5px; border: 0; border-radius: 4px; background: var(--white); color: var(--quiet-text); font-size: 10px; cursor: pointer; opacity: 0; }
 		.route-entry:hover .route-action, .route-entry:focus-within .route-action { opacity: 1; }
 		.route-action:hover { color: var(--ink); background: var(--hover); }
 		.route-action.remove-route:hover { color: var(--danger); }
+		.route-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; }
 		.add-route {
 			display: flex;
 			align-items: center;
@@ -668,9 +669,16 @@
 			routeList.replaceChildren();
 			routeList.classList.remove("category-forward", "category-back");
 			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
-			const publicRoutes = routes.filter((route) => route.id === starterRoute.id);
+			const publicRoutes = [];
 			document.getElementById("route-count").textContent = `(${myRoutes.length})`;
 			document.getElementById("public-route-count").textContent = `(${publicRoutes.length})`;
+			if (activeCategory === "public") {
+				const comingSoon = document.createElement("p");
+				comingSoon.className = "route-empty";
+				comingSoon.textContent = "Coming soon!";
+				comingSoon.setAttribute("role", "status");
+				routeList.append(comingSoon);
+			}
 			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
 			const minimumDistance = Number(distanceMin.value);
 			const maximumDistance = Number(distanceMax.value);
