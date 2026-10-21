@@ -353,8 +353,8 @@
 		.route-form { display: grid; gap: 14px; padding: 18px 25px 23px; }
 		.field { display: grid; gap: 7px; }
 		.field label { color: var(--field-label); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--input-border); border-radius: 9px; outline: none; background: var(--input-bg); color: var(--ink); font-size: 13px; transition: border-color .16s ease, box-shadow .16s ease; }
-		.field input:focus, .field textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
+		.field input, .field textarea, .field select { width: 100%; padding: 11px 12px; border: 1px solid var(--input-border); border-radius: 9px; outline: none; background: var(--input-bg); color: var(--ink); font-size: 13px; transition: border-color .16s ease, box-shadow .16s ease; }
+		.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
 		.field textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
 		.field-hint { color: var(--quiet-text); font-size: 11px; line-height: 1.4; }
 		.form-error { min-height: 16px; margin: -5px 0 0; color: var(--danger); font-size: 12px; }
@@ -537,6 +537,13 @@
 				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
 			</div>
 			<div class="field">
+				<label for="route-type-input">Route type</label>
+				<select id="route-type-input" name="type" required>
+					<option value="Route" selected>Route</option>
+					<option value="Loop">Loop</option>
+				</select>
+			</div>
+			<div class="field">
 				<label for="route-url-input">Map URL or iframe</label>
 				<textarea id="route-url-input" name="url" placeholder="Paste an On The Go Map URL or iframe embed" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required></textarea>
 				<span class="field-hint">Only On The Go Map links are supported. Your routes stay saved on this device.</span>
@@ -667,9 +674,15 @@
 		function loadRoutes() {
 			try {
 				const saved = JSON.parse(localStorage.getItem(storageKey));
-				if (Array.isArray(saved)) return [starterRoute, ...saved.filter((route) =>
-					route && route.id !== starterRoute.id && isOnTheGoMapUrl(route.url)
-				)];
+				if (Array.isArray(saved)) return [
+					starterRoute,
+					...saved.filter((route) =>
+						route && route.id !== starterRoute.id && isOnTheGoMapUrl(route.url)
+					).map((route) => ({
+						...route,
+						type: route.type === "Loop" ? "Loop" : "Route"
+					}))
+				];
 			} catch (error) {
 				return [starterRoute];
 			}
@@ -742,7 +755,7 @@
 				const dot = document.createElement("span");
 				dot.className = "route-dot";
 				dot.setAttribute("aria-hidden", "true");
-				sub.append(dot, document.createTextNode(`${route.kind || "Route"} · ${String(index + 1).padStart(2, "0")}`));
+				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(index + 1).padStart(2, "0")}`));
 				item.append(top, sub);
 				entry.append(item);
 
@@ -920,8 +933,9 @@
 					url,
 					distance: getRouteDistance(url),
 					kind: "Route",
-					type: "Route"
+					type: form.elements.type.value
 				};
+				if (!["Route", "Loop"].includes(route.type)) throw new Error("Choose whether this is a route or a loop.");
 				if (!route.name) throw new Error("Add a name for this route.");
 				routes.push(route);
 				persistRoutes();
