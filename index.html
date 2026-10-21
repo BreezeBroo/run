@@ -531,14 +531,14 @@
 			<div><h2 id="dialog-title">Add a route</h2><p>Add a route from On The Go Map.</p></div>
 			<button class="close-dialog" id="close-dialog" type="button" aria-label="Close">×</button>
 		</div>
-		<form class="route-form" id="route-form">
+		<form class="route-form" id="route-form" autocomplete="off">
 			<div class="field">
 				<label for="route-name-input">Route name</label>
-				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" required>
+				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
 			</div>
 			<div class="field">
 				<label for="route-url-input">Map URL or iframe</label>
-				<textarea id="route-url-input" name="url" placeholder="Paste an On The Go Map URL or iframe embed" required></textarea>
+				<textarea id="route-url-input" name="url" placeholder="Paste an On The Go Map URL or iframe embed" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required></textarea>
 				<span class="field-hint">Only On The Go Map links are supported. Your routes stay saved on this device.</span>
 			</div>
 			<p class="form-error" id="form-error" role="alert"></p>
