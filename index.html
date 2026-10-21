@@ -241,22 +241,26 @@
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { color: inherit; font: inherit; }
-		.route-filter { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-		.distance-label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
-		.distance-filter { display: grid; min-width: 0; gap: 4px; }
-		.distance-values { display: flex; justify-content: space-between; color: var(--secondary-text); font: 10px var(--mono); }
-		.distance-slider { position: relative; height: 22px; margin: 0 8px; }
-		.distance-track, .distance-range { position: absolute; top: 9px; height: 4px; border-radius: 4px; }
+		.route-filter { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+		.distance-filter { display: grid; gap: 5px; }
+		.distance-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+		.distance-label { color: var(--quiet-text); font: 9px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+		.distance-values { display: flex; align-items: baseline; gap: 5px; color: var(--secondary-text); font: 10px var(--mono); font-variant-numeric: tabular-nums; }
+		.distance-values output { white-space: nowrap; }
+		.distance-separator { color: var(--quiet-text); }
+		.distance-slider { position: relative; height: 24px; margin: 0 8px; }
+		.distance-track, .distance-range { position: absolute; top: 10px; height: 4px; border-radius: 4px; }
 		.distance-track { right: 0; left: 0; background: var(--line); }
 		.distance-range { left: var(--range-start); width: calc(var(--range-end) - var(--range-start)); background: var(--coral); }
-		.distance-slider input { position: absolute; top: 0; left: 0; width: 100%; height: 22px; margin: 0; appearance: none; background: transparent; pointer-events: none; }
-		.distance-slider input::-webkit-slider-runnable-track { height: 4px; background: transparent; }
-		.distance-slider input::-moz-range-track { height: 4px; background: transparent; }
-		.distance-slider input::-webkit-slider-thumb { width: 16px; height: 16px; margin-top: -6px; appearance: none; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
-		.distance-slider input::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
+		.distance-slider input { position: absolute; top: 0; left: 0; z-index: 1; width: 100%; height: 24px; margin: 0; appearance: none; border: 0; outline: 0; background: transparent; pointer-events: none; }
+		.distance-slider input::-webkit-slider-runnable-track { height: 4px; border: 0; background: transparent; }
+		.distance-slider input::-moz-range-track, .distance-slider input::-moz-range-progress { height: 4px; border: 0; background: transparent; }
+		.distance-slider input::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -5px; appearance: none; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
+		.distance-slider input::-moz-range-thumb { width: 10px; height: 10px; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
 		.distance-slider input:focus-visible { outline: none; }
 		.distance-slider input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
 		.distance-slider input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
+		#distance-min { z-index: 2; }
 		.route-item {
 			position: relative;
 			width: 100%;
@@ -455,9 +459,11 @@
 					</button>
 				</div>
 				<div class="route-filter">
-					<span class="distance-label">Distance</span>
 					<div class="distance-filter">
-						<div class="distance-values"><output id="distance-min-value" for="distance-min">0 km</output><output id="distance-max-value" for="distance-max">50 km</output></div>
+						<div class="distance-heading">
+							<span class="distance-label">Distance</span>
+							<span class="distance-values"><output id="distance-min-value" for="distance-min">0 km</output><span class="distance-separator" aria-hidden="true">–</span><output id="distance-max-value" for="distance-max">50 km</output></span>
+						</div>
 						<div class="distance-slider" id="distance-slider" style="--range-start: 0%; --range-end: 100%;">
 							<div class="distance-track" aria-hidden="true"></div>
 							<div class="distance-range" aria-hidden="true"></div>
