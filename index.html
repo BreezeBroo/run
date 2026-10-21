@@ -274,6 +274,7 @@
 			transition: background .18s ease, border-color .18s ease, transform .18s ease;
 		}
 		.route-entry { position: relative; }
+		.route-entry.has-actions .route-item { padding-bottom: 34px; }
 		.route-item:hover { background: var(--hover); }
 		.route-item.active { border-color: var(--active-border); background: var(--active); }
 		.route-item.active::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; background: var(--coral); border-radius: 0 3px 3px 0; }
@@ -282,9 +283,11 @@
 		.route-distance { flex: none; color: var(--route-distance); font: 11px var(--mono); }
 		.route-sub { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--secondary-text); font-size: 11px; }
 		.route-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--coral); }
-		.remove-route { position: absolute; right: 10px; bottom: 11px; padding: 3px 5px; border: 0; background: transparent; color: var(--quiet-text); font-size: 11px; cursor: pointer; opacity: 0; }
-		.route-entry:hover .remove-route, .route-entry:focus-within .remove-route { opacity: 1; }
-		.remove-route:hover { color: var(--danger); }
+		.route-actions { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 8px; }
+		.route-action { padding: 3px 5px; border: 0; border-radius: 4px; background: var(--white); color: var(--quiet-text); font-size: 10px; cursor: pointer; opacity: 0; }
+		.route-entry:hover .route-action, .route-entry:focus-within .route-action { opacity: 1; }
+		.route-action:hover { color: var(--ink); background: var(--hover); }
+		.route-action.remove-route:hover { color: var(--danger); }
 		.add-route {
 			display: flex;
 			align-items: center;
@@ -410,7 +413,7 @@
 			.sidebar { min-height: auto; }
 			.route-list { display: flex; gap: 7px; overflow-x: auto; padding: 8px 10px 12px; scrollbar-width: thin; }
 			.route-entry { flex: 0 0 205px; min-width: 0; }
-			.remove-route { opacity: 1; }
+			.route-action { opacity: 1; }
 			.add-route { margin-top: 0; }
 			.side-foot { display: none; }
 			.map-frame, .map-frame iframe { min-height: 360px; }
@@ -583,6 +586,23 @@
 			</div>
 		</form>
 	</dialog>
+	<dialog id="rename-dialog" aria-labelledby="rename-title">
+		<div class="dialog-head">
+			<div><h2 id="rename-title">Rename route</h2><p>Choose a name that’s easy to recognize.</p></div>
+			<button class="close-dialog" id="close-rename-dialog" type="button" aria-label="Close rename dialog">×</button>
+		</div>
+		<form class="route-form" id="rename-form">
+			<div class="field">
+				<label for="rename-route-input">Route name</label>
+				<input id="rename-route-input" name="name" maxlength="60" required>
+			</div>
+			<p class="form-error" id="rename-error" role="alert"></p>
+			<div class="form-actions">
+				<button id="cancel-rename" type="button">Cancel</button>
+				<button class="save-route" type="submit">Save name</button>
+			</div>
+		</form>
+	</dialog>
 	<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
 		<div class="dialog-head">
 			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waymark looks on this device.</p></div>
@@ -636,6 +656,7 @@
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
 		const routeDialog = document.getElementById("route-dialog");
+		const renameDialog = document.getElementById("rename-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const suggestRouteButton = document.getElementById("suggest-route-button");
 		const suggestionStatus = document.getElementById("suggestion-status");
@@ -651,6 +672,7 @@
 		};
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
+		let routeToRenameId = null;
 		let activeCategory = "mine";
 		let pendingSuggestedRoute = null;
 		let suggestedLeafletMap = null;
@@ -736,7 +758,7 @@
 		function renderRouteList(categoryRoutes, list) {
 			categoryRoutes.forEach((route, index) => {
 				const entry = document.createElement("div");
-				entry.className = "route-entry";
+				entry.className = `route-entry${route.id !== starterRoute.id ? " has-actions" : ""}`;
 				entry.setAttribute("role", "listitem");
 				const item = document.createElement("button");
 				item.type = "button";
@@ -764,16 +786,35 @@
 				entry.append(item);
 
 				if (route.id !== starterRoute.id) {
+					const actions = document.createElement("div");
+					actions.className = "route-actions";
+					const rename = document.createElement("button");
+					rename.type = "button";
+					rename.className = "route-action rename-route";
+					rename.textContent = "Rename";
+					rename.setAttribute("aria-label", `Rename ${route.name}`);
+					rename.addEventListener("click", (event) => {
+						event.stopPropagation();
+						routeToRenameId = route.id;
+						document.getElementById("rename-route-input").value = route.name;
+						document.getElementById("rename-error").textContent = "";
+						renameDialog.showModal();
+						document.getElementById("rename-route-input").focus();
+						document.getElementById("rename-route-input").select();
+					});
+					actions.append(rename);
+
 					const remove = document.createElement("button");
 					remove.type = "button";
-					remove.className = "remove-route";
+					remove.className = "route-action remove-route";
 					remove.textContent = "Remove";
 					remove.setAttribute("aria-label", `Remove ${route.name}`);
 					remove.addEventListener("click", (event) => {
 						event.stopPropagation();
 						deleteRoute(route.id);
 					});
-					entry.append(remove);
+					actions.append(remove);
+					entry.append(actions);
 				}
 				item.addEventListener("click", () => selectRoute(route.id));
 				list.append(entry);
@@ -807,10 +848,9 @@
 
 		function createSuggestedMap(element) {
 			const map = L.map(element);
-			L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-				maxZoom: 20,
-				subdomains: "abcd",
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+			L.tileLayer("https://tile.openstreetmap.de/{z}/{x}/{y}.png", {
+				maxZoom: 19,
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
 			return map;
 		}
@@ -1134,6 +1174,35 @@
 		document.getElementById("cancel-dialog").addEventListener("click", () => routeDialog.close());
 		routeDialog.addEventListener("click", (event) => {
 			if (event.target === routeDialog) routeDialog.close();
+		});
+		function closeRenameDialog() {
+			renameDialog.close();
+			routeToRenameId = null;
+		}
+		document.getElementById("close-rename-dialog").addEventListener("click", closeRenameDialog);
+		document.getElementById("cancel-rename").addEventListener("click", closeRenameDialog);
+		renameDialog.addEventListener("click", (event) => {
+			if (event.target === renameDialog) closeRenameDialog();
+		});
+		document.getElementById("rename-form").addEventListener("submit", (event) => {
+			event.preventDefault();
+			const route = routes.find((entry) => entry.id === routeToRenameId);
+			const name = document.getElementById("rename-route-input").value.trim();
+			const error = document.getElementById("rename-error");
+			if (!route) {
+				error.textContent = "This route is no longer available.";
+				return;
+			}
+			if (!name) {
+				error.textContent = "Enter a name for this route.";
+				return;
+			}
+			route.name = name;
+			persistRoutes();
+			if (route.id === selectedId) document.getElementById("active-name").textContent = name;
+			renderRoutes();
+			closeRenameDialog();
+			showToast("Route renamed.");
 		});
 		document.getElementById("route-form").addEventListener("submit", (event) => {
 			event.preventDefault();
