@@ -233,15 +233,17 @@
 		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
 		.count { color: var(--muted); font: 11px var(--mono); }
 		.route-list { padding: 10px; }
-		.route-tabs { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
-		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 25%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
-		.route-tabs[data-active-category="10k"]::after { transform: translateX(100%); }
-		.route-tabs[data-active-category="half"]::after { transform: translateX(200%); }
-		.route-tabs[data-active-category="marathon"]::after { transform: translateX(300%); }
-		.route-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 2px; border: 0; background: transparent; color: var(--muted); font-size: 10px; font-weight: 700; line-height: 1.2; cursor: pointer; }
+		.route-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
+		.route-tabs[data-active-category="public"]::after { transform: translateX(100%); }
+		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { font-size: 9px; }
+		.route-filter { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+		.route-filter label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
+		.route-filter select { min-width: 0; padding: 7px 26px 7px 9px; border: 1px solid var(--input-border); border-radius: 7px; background: var(--input-bg); color: var(--ink); font-size: 11px; cursor: pointer; }
+		.route-filter select:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.route-item {
 			position: relative;
 			width: 100%;
@@ -421,19 +423,23 @@
 
 		<section class="workspace" aria-label="Route library and route map">
 			<aside class="sidebar" aria-label="Route library">
-				<div class="route-tabs" id="route-tabs" role="group" aria-label="Run distance categories">
-					<button class="route-tab" type="button" data-category="5k" aria-label="5 kilometer runs" aria-controls="route-list" aria-pressed="false">
-						5 km <span class="count" id="category-count-5k">00</span>
+				<div class="route-tabs" id="route-tabs" role="group" aria-label="Route ownership">
+					<button class="route-tab" id="saved-routes-tab" type="button" data-category="mine" aria-controls="route-list" aria-pressed="false">
+						My routes <span class="count" id="route-count">00</span>
 					</button>
-					<button class="route-tab" type="button" data-category="10k" aria-label="10 kilometer runs" aria-controls="route-list" aria-pressed="false">
-						10 km <span class="count" id="category-count-10k">00</span>
+					<button class="route-tab" id="public-routes-tab" type="button" data-category="public" aria-controls="route-list" aria-pressed="false">
+						Public routes <span class="count" id="public-route-count">00</span>
 					</button>
-					<button class="route-tab" type="button" data-category="half" aria-label="Half marathon runs" aria-controls="route-list" aria-pressed="false">
-						½ marathon <span class="count" id="category-count-half">00</span>
-					</button>
-					<button class="route-tab" type="button" data-category="marathon" aria-label="Marathon runs" aria-controls="route-list" aria-pressed="false">
-						Marathon <span class="count" id="category-count-marathon">00</span>
-					</button>
+				</div>
+				<div class="route-filter">
+					<label for="distance-filter">Distance</label>
+					<select id="distance-filter" aria-label="Filter routes by distance class">
+						<option value="all">All distances</option>
+						<option value="5k">5 km</option>
+						<option value="10k">10 km</option>
+						<option value="half">21.0975 km (half marathon)</option>
+						<option value="marathon">42.195 km (marathon)</option>
+					</select>
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
 				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
@@ -525,6 +531,9 @@
 		const themeStorageKey = "waymark-theme-v1";
 		const routeList = document.getElementById("route-list");
 		const routeTabs = document.getElementById("route-tabs");
+		const savedRoutesTab = document.getElementById("saved-routes-tab");
+		const publicRoutesTab = document.getElementById("public-routes-tab");
+		const distanceFilter = document.getElementById("distance-filter");
 		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
@@ -540,12 +549,12 @@
 		];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
-		let activeCategory = getDistanceCategory((routes.find((route) => route.id === selectedId) || starterRoute).distance);
+		let activeCategory = selectedId === starterRoute.id ? "public" : "mine";
 		let toastTimer;
 
 		function getDistanceCategory(distance) {
 			const kilometers = Number(distance);
-			if (!Number.isFinite(kilometers) || kilometers <= 0) return distanceCategories[0].id;
+			if (!Number.isFinite(kilometers) || kilometers <= 0) return null;
 			return distanceCategories.find((category) => kilometers <= category.max)?.id || "marathon";
 		}
 
@@ -601,11 +610,12 @@
 		function renderRoutes(animationDirection = "") {
 			routeList.replaceChildren();
 			routeList.classList.remove("category-forward", "category-back");
-			distanceCategories.forEach((category) => {
-				const count = routes.filter((route) => getDistanceCategory(route.distance) === category.id).length;
-				document.getElementById(`category-count-${category.id}`).textContent = String(count).padStart(2, "0");
-			});
-			const categoryRoutes = routes.filter((route) => getDistanceCategory(route.distance) === activeCategory);
+			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
+			const publicRoutes = routes.filter((route) => route.id === starterRoute.id);
+			document.getElementById("route-count").textContent = String(myRoutes.length).padStart(2, "0");
+			document.getElementById("public-route-count").textContent = String(publicRoutes.length).padStart(2, "0");
+			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
+			const categoryRoutes = activeRoutes.filter((route) => distanceFilter.value === "all" || getDistanceCategory(route.distance) === distanceFilter.value);
 			renderRouteList(categoryRoutes, routeList);
 			routeTabs.dataset.activeCategory = activeCategory;
 			if (animationDirection) {
@@ -614,6 +624,7 @@
 			routeTabs.querySelectorAll(".route-tab").forEach((tab) => {
 				tab.setAttribute("aria-pressed", String(tab.dataset.category === activeCategory));
 			});
+			addRouteButton.hidden = activeCategory !== "mine";
 		}
 
 		function renderRouteList(categoryRoutes, list) {
@@ -667,7 +678,7 @@
 			const route = routes.find((entry) => entry.id === id);
 			if (!route) return;
 			selectedId = id;
-			activeCategory = getDistanceCategory(route.distance);
+			activeCategory = route.id === starterRoute.id ? "public" : "mine";
 			renderRoutes();
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
@@ -685,11 +696,12 @@
 		routeTabs.addEventListener("click", (event) => {
 			const tab = event.target.closest(".route-tab");
 			if (!tab || tab.dataset.category === activeCategory) return;
-			const previousIndex = distanceCategories.findIndex((category) => category.id === activeCategory);
-			const nextIndex = distanceCategories.findIndex((category) => category.id === tab.dataset.category);
+			const previousIndex = activeCategory === "mine" ? 0 : 1;
+			const nextIndex = tab.dataset.category === "mine" ? 0 : 1;
 			activeCategory = tab.dataset.category;
 			renderRoutes(nextIndex > previousIndex ? "category-forward" : "category-back");
 		});
+		distanceFilter.addEventListener("change", () => renderRoutes());
 
 		function deleteRoute(id) {
 			routes = routes.filter((route) => route.id !== id);
