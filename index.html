@@ -47,72 +47,62 @@
 			--serif: "Fraunces", Georgia, serif;
 		}
 
-		:root[data-theme="light"] {
-			--ink: #23363c;
-			--muted: #6f8187;
-			--paper: #f1f6f6;
+		:root[data-theme="light"],
+		:root[data-theme="system"] {
+			color-scheme: light;
+			--ink: #292b2d;
+			--muted: #6d7073;
+			--paper: #f4f4f1;
 			--white: #ffffff;
-			--line: #d8e3e3;
-			--forest: #234b50;
-			--leaf: #e2cd78;
-			--coral: #d9785e;
-			--eyebrow: #607d80;
-			--intro-copy: #6d8082;
-			--hover: #edf4f3;
-			--active: #e7f0ee;
-			--active-border: #bed7d2;
-			--route-distance: #54787b;
-			--secondary-text: #718488;
-			--quiet-text: #849397;
-			--button-text: #355c60;
-			--button-bg: #f7faf9;
-			--input-bg: #fbfdfc;
-			--input-border: #d4e0df;
-			--field-label: #627b7d;
-			--focus-ring: #a9d4c655;
-			--map-bg: #e1ebea;
-			--empty-copy: #718488;
-			--stat-value: #314d50;
-			--dialog-border: #d8e3e3;
-			--backdrop: #203a3bb8;
-			--shadow: 0 18px 55px #233b3a16;
+			--line: #dedfdb;
+			--forest: #e5e6e2;
+			--leaf: #d8bd62;
+			--coral: #c56e57;
+			--topbar-text: #303332;
+			--eyebrow: #626866;
+			--intro-copy: #717674;
+			--hover: #ededeb;
+			--active: #eeeee9;
+			--active-border: #d9d7cc;
+			--route-distance: #656963;
+			--secondary-text: #737774;
+			--quiet-text: #858985;
+			--button-text: #424644;
+			--button-bg: #f8f8f6;
+			--input-bg: #fdfdfb;
+			--input-border: #d8d9d5;
+			--field-label: #666a67;
+			--focus-ring: #d8bd6255;
+			--map-bg: #e7e8e4;
+			--empty-copy: #717674;
+			--stat-value: #343735;
+			--dialog-border: #dedfdb;
+			--backdrop: #292d2bb8;
+			--shadow: 0 18px 55px #292d2b16;
 			--danger: #bc5945;
 		}
 
 		:root[data-theme="forest"] {
-			--paper: #edf3ed;
-			--white: #fbfdf9;
-			--line: #d6e2d7;
-			--forest: #1d4635;
-			--leaf: #b7dc88;
-			--coral: #d9785e;
-			--hover: #f0f6ef;
-			--active: #e9f2e6;
-			--active-border: #c0d8b5;
-			--map-bg: #e1ebe1;
-		}
-
-		:root[data-theme="dark"] {
 			color-scheme: dark;
-			--ink: #edf3ed;
+			--ink: #e7f1e9;
 			--muted: #a4b2a8;
-			--paper: #151c18;
-			--white: #202b24;
-			--line: #3a4a40;
-			--forest: #1c3025;
-			--leaf: #c0e584;
+			--paper: #101a14;
+			--white: #1a2a20;
+			--line: #34483a;
+			--forest: #102d1d;
+			--leaf: #b7dc88;
 			--coral: #f08b70;
 			--topbar-text: #f7fbf6;
 			--eyebrow: #a7b8aa;
 			--intro-copy: #abb8ae;
-			--hover: #2a3930;
-			--active: #2a3b30;
-			--active-border: #526c52;
+			--hover: #26362b;
+			--active: #293d30;
+			--active-border: #4e6a53;
 			--route-distance: #c0d0b7;
 			--secondary-text: #a9b7ad;
 			--quiet-text: #9ba99f;
 			--button-text: #dce8de;
-			--button-bg: #27352c;
+			--button-bg: #26342b;
 			--input-bg: #19231c;
 			--input-border: #46574a;
 			--field-label: #c0cdc2;
@@ -126,40 +116,70 @@
 			--danger: #ff9a84;
 		}
 
-		:root[data-theme="system"] {
-			color-scheme: light;
+		:root[data-theme="dark"] {
+			color-scheme: dark;
+			--ink: #f0f0ee;
+			--muted: #b3b3b0;
+			--paper: #111211;
+			--white: #1e1f1e;
+			--line: #393a39;
+			--forest: #090a09;
+			--leaf: #d0d0ca;
+			--coral: #d7d7d1;
+			--topbar-text: #f7f7f5;
+			--eyebrow: #bcbcb7;
+			--intro-copy: #b0b0ac;
+			--hover: #292a29;
+			--active: #303130;
+			--active-border: #535451;
+			--route-distance: #d0d0ca;
+			--secondary-text: #b6b6b1;
+			--quiet-text: #9f9f9a;
+			--button-text: #e1e1dc;
+			--button-bg: #272827;
+			--input-bg: #191a19;
+			--input-border: #484948;
+			--field-label: #c7c7c2;
+			--focus-ring: #deded844;
+			--map-bg: #292a29;
+			--empty-copy: #b8b8b3;
+			--stat-value: #e6e6e1;
+			--dialog-border: #444544;
+			--backdrop: #050505d9;
+			--shadow: 0 24px 80px #0009;
+			--danger: #ff9a84;
 		}
 
 		@media (prefers-color-scheme: dark) {
 			:root[data-theme="system"] {
 				color-scheme: dark;
-				--ink: #edf3ed;
-				--muted: #a4b2a8;
-				--paper: #151c18;
-				--white: #202b24;
-				--line: #3a4a40;
-				--forest: #1c3025;
-				--leaf: #c0e584;
-				--coral: #f08b70;
-				--eyebrow: #a7b8aa;
-				--intro-copy: #abb8ae;
-				--hover: #2a3930;
-				--active: #2a3b30;
-				--active-border: #526c52;
-				--route-distance: #c0d0b7;
-				--secondary-text: #a9b7ad;
-				--quiet-text: #9ba99f;
-				--button-text: #dce8de;
-				--button-bg: #27352c;
-				--input-bg: #19231c;
-				--input-border: #46574a;
-				--field-label: #c0cdc2;
-				--focus-ring: #c0e58444;
-				--map-bg: #293a30;
-				--empty-copy: #b1beb3;
-				--stat-value: #e1ebde;
-				--dialog-border: #425148;
-				--backdrop: #101a14d9;
+				--ink: #f0f0ee;
+				--muted: #b3b3b0;
+				--paper: #111211;
+				--white: #1e1f1e;
+				--line: #393a39;
+				--forest: #090a09;
+				--leaf: #d0d0ca;
+				--coral: #d7d7d1;
+				--eyebrow: #bcbcb7;
+				--intro-copy: #b0b0ac;
+				--hover: #292a29;
+				--active: #303130;
+				--active-border: #535451;
+				--route-distance: #d0d0ca;
+				--secondary-text: #b6b6b1;
+				--quiet-text: #9f9f9a;
+				--button-text: #e1e1dc;
+				--button-bg: #272827;
+				--input-bg: #191a19;
+				--input-border: #484948;
+				--field-label: #c7c7c2;
+				--focus-ring: #deded844;
+				--map-bg: #292a29;
+				--empty-copy: #b8b8b3;
+				--stat-value: #e6e6e1;
+				--dialog-border: #444544;
+				--backdrop: #050505d9;
 				--shadow: 0 24px 80px #0009;
 				--danger: #ff9a84;
 			}
@@ -307,19 +327,11 @@
 		.theme-option input:checked + label { border-color: var(--route-distance); background: var(--active); }
 		.theme-option input:checked + label::after { border: 5px solid var(--route-distance); background: var(--white); }
 		.theme-option input:focus-visible + label { outline: 2px solid var(--coral); outline-offset: 2px; }
-		.theme-swatch { --preview-accent: #234b50; --preview-muted: #a9c7c3; --preview-surface: #ffffff; --preview-map: #e1ebea; --preview-route: #d9785e; display: grid; width: 52px; height: 38px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px #142d2b18; }
-		.theme-swatch.forest { --preview-accent: #1d4635; --preview-muted: #b8cbb9; --preview-surface: #fbfdf9; --preview-map: #e1ebe1; --preview-route: #d9785e; }
-		.theme-swatch.dark { --preview-accent: #c0e584; --preview-muted: #526c52; --preview-surface: #202b24; --preview-map: #293a30; --preview-route: #f08b70; }
-		.theme-swatch.system { --preview-surface: #202b24; }
-		.theme-preview-chrome { border-radius: 2px; background: var(--preview-accent); }
-		.theme-preview-body { display: grid; min-height: 0; grid-template-columns: 12px 1fr; gap: 3px; }
-		.theme-preview-nav { border-radius: 2px; background: repeating-linear-gradient(to bottom, var(--preview-muted) 0 2px, transparent 2px 4px); }
-		.theme-preview-map { position: relative; overflow: hidden; border-radius: 2px; background: var(--preview-map); }
-		.theme-preview-map::after { position: absolute; top: 45%; left: 22%; width: 65%; height: 2px; border-radius: 2px; background: var(--preview-route); content: ""; transform: rotate(-28deg); }
-		.theme-swatch.system .theme-preview-chrome { background: linear-gradient(90deg, #234b50 0 50%, #1c3025 50%); }
-		.theme-swatch.system .theme-preview-nav { background: linear-gradient(90deg, #a9c7c3 0 50%, #526c52 50%); }
-		.theme-swatch.system .theme-preview-map { background: linear-gradient(90deg, #e1ebea 0 50%, #293a30 50%); }
-		.theme-swatch.system .theme-preview-map::after { background: linear-gradient(90deg, #d9785e 0 50%, #f08b70 50%); }
+		.theme-swatch { display: block; width: 32px; height: 32px; flex: none; border: 1px solid #0002; border-radius: 8px; box-shadow: inset 0 0 0 1px #ffffff20, 0 1px 3px #0002; }
+		.theme-swatch.forest { background: #17452b; border-color: #123820; }
+		.theme-swatch.dark { background: #111111; border-color: #000000; }
+		.theme-swatch.light { background: #ffffff; border-color: #c9cbc8; }
+		.theme-swatch.system { background: linear-gradient(90deg, #ffffff 0 50%, #111111 50%); border-color: #858785; }
 		.theme-option-copy { display: grid; gap: 3px; }
 		.theme-option-copy strong { font-size: 13px; font-weight: 700; }
 		.theme-option-copy span { color: var(--muted); font-size: 11px; }
@@ -461,19 +473,19 @@
 		<div class="theme-options" role="radiogroup" aria-label="Color theme">
 			<div class="theme-option">
 				<input id="theme-forest" name="theme" type="radio" value="forest">
-				<label for="theme-forest"><span class="theme-swatch forest" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Forest</strong><span>Soft greens and trail-inspired accents</span></span></label>
+				<label for="theme-forest"><span class="theme-swatch forest" aria-hidden="true"></span><span class="theme-option-copy"><strong>Forest</strong><span>Soft greens and trail-inspired accents</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-light" name="theme" type="radio" value="light">
-				<label for="theme-light"><span class="theme-swatch light" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Light</strong><span>Cool, clear surfaces with coastal tones</span></span></label>
+				<label for="theme-light"><span class="theme-swatch light" aria-hidden="true"></span><span class="theme-option-copy"><strong>Light</strong><span>Clean, bright surfaces with charcoal details</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-dark" name="theme" type="radio" value="dark">
-				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Dark</strong><span>Quiet contrast for low-light spaces</span></span></label>
+				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"></span><span class="theme-option-copy"><strong>Dark</strong><span>Monochrome charcoal for low-light spaces</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-system" name="theme" type="radio" value="system">
-				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
+				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
 			</div>
 		</div>
 	</dialog>
