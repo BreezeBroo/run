@@ -320,6 +320,12 @@
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
 		.map-frame iframe[hidden], .suggested-map[hidden] { display: none; }
 		.suggested-map { position: absolute; inset: 0; z-index: 1; }
+		.route-map-key { position: absolute; bottom: 14px; left: 14px; z-index: 400; display: inline-flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--ink); font-size: 11px; font-weight: 700; box-shadow: var(--shadow); }
+		.route-map-key[hidden] { display: none; }
+		.route-map-swatch { width: 24px; height: 5px; border: 1px solid #fff; border-radius: 4px; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); }
+		.route-map-point { width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; }
+		.route-map-point.start { background: #247a52; }
+		.route-map-point.finish { background: #b84635; }
 		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); text-align: center; }
 		.empty-inner { max-width: 280px; }
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
@@ -330,29 +336,37 @@
 		.stat-label { display: block; margin-bottom: 5px; color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 		.stat-value { color: var(--stat-value); font: 500 17px var(--serif); }
 		.credit { margin-left: auto; align-self: center; padding: 0 22px; color: var(--quiet-text); font-size: 10px; text-align: right; }
-		dialog { width: min(520px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--dialog-border); border-radius: 16px; background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+		dialog { width: min(620px, calc(100vw - 32px)); max-height: min(90vh, 850px); padding: 0; overflow: auto; border: 1px solid var(--dialog-border); border-radius: 16px; background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
 		dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(5px); }
-		.dialog-head { display: flex; justify-content: space-between; align-items: start; padding: 24px 25px 18px; border-bottom: 1px solid var(--line); }
-		.dialog-head h2 { margin: 0; font: 500 25px var(--serif); }
+		.dialog-head { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: start; padding: 22px 25px 17px; border-bottom: 1px solid var(--line); background: var(--white); }
+		.dialog-head h2 { margin: 0; font: 500 27px var(--serif); }
 		.dialog-head p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
 		.close-dialog { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: var(--button-bg); font-size: 18px; cursor: pointer; }
-		.route-form { display: grid; gap: 16px; padding: 21px 25px 25px; }
+		.route-form { display: grid; gap: 14px; padding: 18px 25px 23px; }
 		.field { display: grid; gap: 7px; }
 		.field label { color: var(--field-label); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--input-border); border-radius: 9px; outline: none; background: var(--input-bg); color: var(--ink); font-size: 13px; }
+		.field input, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--input-border); border-radius: 9px; outline: none; background: var(--input-bg); color: var(--ink); font-size: 13px; transition: border-color .16s ease, box-shadow .16s ease; }
 		.field input:focus, .field textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
-		.field textarea { min-height: 102px; resize: vertical; line-height: 1.5; }
+		.field textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
 		.field-hint { color: var(--quiet-text); font-size: 11px; line-height: 1.4; }
-		.suggest-route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, .7fr) auto; align-items: end; gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--hover); }
+		.suggest-route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, .7fr) auto; align-items: end; gap: 10px; padding: 14px; border: 1px solid var(--active-border); border-radius: 12px; background: var(--active); }
+		.suggest-route-head, .manual-route-head { grid-column: 1 / -1; }
+		.suggest-route-head strong, .manual-route-head strong { display: block; color: var(--ink); font-size: 13px; }
+		.suggest-route-head span, .manual-route-head span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+		.manual-route-head { padding-top: 12px; border-top: 1px solid var(--line); }
 		.suggest-distance { display: grid; gap: 6px; color: var(--field-label); font: 9px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 		.suggest-distance input, .suggest-distance select { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--ink); font: 12px var(--sans); letter-spacing: 0; }
 		.suggest-route button { min-height: 39px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; }
 		.suggest-route button:hover { background: var(--active); }
 		.suggest-route button:disabled { cursor: wait; opacity: .65; }
 		.suggestion-note, .suggestion-status { grid-column: 1 / -1; margin: 0; color: var(--quiet-text); font-size: 10px; line-height: 1.45; }
-		.suggestion-status { color: var(--stat-value); }
+		.suggestion-status { color: var(--stat-value); font-weight: 700; }
+		.suggestion-preview { grid-column: 1 / -1; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--map-bg); }
+		.suggestion-preview[hidden] { display: none; }
+		.suggestion-preview-head { padding: 9px 11px; border-bottom: 1px solid var(--line); background: var(--white); color: var(--ink); font-size: 11px; font-weight: 700; }
+		.suggestion-map { width: 100%; height: 190px; }
 		.form-error { min-height: 16px; margin: -5px 0 0; color: var(--danger); font-size: 12px; }
-		.form-actions { display: flex; justify-content: flex-end; gap: 9px; }
+		.form-actions { position: sticky; bottom: -1px; z-index: 2; display: flex; justify-content: flex-end; gap: 9px; margin: 0 -25px -23px; padding: 12px 25px; border-top: 1px solid var(--line); background: var(--white); }
 		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); font-size: 12px; font-weight: 700; cursor: pointer; }
 		.form-actions .create-route { display: inline-flex; align-items: center; min-height: 39px; margin-right: auto; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 12px; font-weight: 700; text-decoration: none; }
 		.form-actions .create-route:hover { background: var(--hover); }
@@ -502,6 +516,7 @@
 				<div class="map-frame" id="map-frame">
 					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
 					<div class="suggested-map" id="suggested-map" aria-label="Suggested walking route map" hidden></div>
+					<div class="route-map-key" id="route-map-key" hidden><span class="route-map-swatch" aria-hidden="true"></span><span id="route-map-key-label">Suggested route</span><span class="route-map-point start" aria-hidden="true"></span><span>Start</span><span class="route-map-point finish" aria-hidden="true"></span><span>Finish</span></div>
 					<div class="map-empty" id="map-empty">
 						<div class="empty-inner"><strong>Map unavailable.</strong><span>This map can’t be displayed here. Open it to view it on its original site.</span></div>
 					</div>
@@ -517,20 +532,15 @@
 
 	<dialog id="route-dialog" aria-labelledby="dialog-title">
 		<div class="dialog-head">
-			<div><h2 id="dialog-title">Add a route</h2><p>Paste a map link or the full iframe embed.</p></div>
+			<div><h2 id="dialog-title">Add a route</h2><p>Get a route near you or add one from a map link.</p></div>
 			<button class="close-dialog" id="close-dialog" type="button" aria-label="Close">×</button>
 		</div>
 		<form class="route-form" id="route-form">
-			<div class="field">
-				<label for="route-name-input">Route name</label>
-				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" required>
-			</div>
-			<div class="field">
-				<label for="route-url-input">Map URL or iframe</label>
-				<textarea id="route-url-input" name="url" placeholder="Paste an https:// map URL or the full <iframe> code" required></textarea>
-				<span class="field-hint">Length is detected from On The Go Map links when available. Your route stays saved on this device.</span>
-			</div>
 			<div class="suggest-route">
+				<div class="suggest-route-head">
+					<strong>Get a route suggestion</strong>
+					<span>Choose an activity and distance. We’ll find a loop near your current location.</span>
+				</div>
 				<label class="suggest-distance" for="suggested-activity">
 					Activity
 					<select id="suggested-activity" aria-required="true">
@@ -547,6 +557,23 @@
 				<button id="suggest-route-button" type="button">Suggest nearby route</button>
 				<p class="suggestion-note">Uses your location to request a nearby loop from OpenStreetMap's public routing service.</p>
 				<p class="suggestion-status" id="suggestion-status" role="status" aria-live="polite"></p>
+				<div class="suggestion-preview" id="suggestion-preview" hidden>
+					<div class="suggestion-preview-head">Route preview · not saved yet</div>
+					<div class="suggestion-map" id="suggestion-map" aria-label="Preview of suggested route"></div>
+				</div>
+			</div>
+			<div class="manual-route-head">
+				<strong>Or add your own route</strong>
+				<span>Paste a map link or an iframe embed that you already have.</span>
+			</div>
+			<div class="field">
+				<label for="route-name-input">Route name</label>
+				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" required>
+			</div>
+			<div class="field">
+				<label for="route-url-input">Map URL or iframe</label>
+				<textarea id="route-url-input" name="url" placeholder="Paste an https:// map link or iframe embed" required></textarea>
+				<span class="field-hint">Length is detected from On The Go Map links when available. Your routes stay saved on this device.</span>
 			</div>
 			<p class="form-error" id="form-error" role="alert"></p>
 			<div class="form-actions">
@@ -604,12 +631,16 @@
 		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
 		const suggestedMapElement = document.getElementById("suggested-map");
+		const routeMapKey = document.getElementById("route-map-key");
+		const routeMapKeyLabel = document.getElementById("route-map-key-label");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
 		const routeDialog = document.getElementById("route-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const suggestRouteButton = document.getElementById("suggest-route-button");
 		const suggestionStatus = document.getElementById("suggestion-status");
+		const suggestionPreview = document.getElementById("suggestion-preview");
+		const suggestionMapElement = document.getElementById("suggestion-map");
 		const suggestedActivity = document.getElementById("suggested-activity");
 		const suggestedDistance = document.getElementById("suggested-distance");
 		const themeNames = ["forest", "light", "dark", "system"];
@@ -624,6 +655,8 @@
 		let pendingSuggestedRoute = null;
 		let suggestedLeafletMap = null;
 		let suggestedRouteLayer = null;
+		let suggestionLeafletMap = null;
+		let suggestionRouteLayer = null;
 		let toastTimer;
 
 		function applyTheme(theme) {
@@ -762,6 +795,7 @@
 				return;
 			}
 			suggestedMapElement.hidden = true;
+			routeMapKey.hidden = true;
 			mapFrame.hidden = false;
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
@@ -771,11 +805,48 @@
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
 
+		function createSuggestedMap(element) {
+			const map = L.map(element);
+			L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				maxZoom: 19,
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(map);
+			return map;
+		}
+
+		function drawSuggestedRoute(map, oldLayer, route) {
+			if (oldLayer) map.removeLayer(oldLayer);
+			const color = getComputedStyle(document.documentElement).getPropertyValue("--coral").trim() || "#d9785e";
+			const routeGroup = L.featureGroup();
+			const casing = L.geoJSON(route.geometry, {
+				style: { color: "#ffffff", weight: 12, opacity: 0.95, lineCap: "round", lineJoin: "round" }
+			}).addTo(routeGroup);
+			const line = L.geoJSON(route.geometry, {
+				style: { color, weight: 7, opacity: 1, lineCap: "round", lineJoin: "round" }
+			}).addTo(routeGroup);
+			const coordinates = route.geometry.coordinates;
+			const start = coordinates[0];
+			const finish = coordinates[coordinates.length - 1];
+			const markers = L.featureGroup([
+				L.circleMarker([start[1], start[0]], {
+					radius: 9, color: "#ffffff", weight: 3, fillColor: "#247a52", fillOpacity: 1
+				}).bindTooltip("Start"),
+				L.circleMarker([finish[1], finish[0]], {
+					radius: 7, color: "#ffffff", weight: 3, fillColor: "#b84635", fillOpacity: 1
+				}).bindTooltip("Finish")
+			]).addTo(routeGroup);
+			routeGroup.addTo(map);
+			map.fitBounds(line.getBounds(), { padding: [36, 36], maxZoom: 16 });
+			requestAnimationFrame(() => map.invalidateSize());
+			return routeGroup;
+		}
+
 		function showSuggestedRoute(route) {
 			if (!window.L) {
 				mapEmpty.style.display = "grid";
 				mapFrame.hidden = true;
 				suggestedMapElement.hidden = true;
+				routeMapKey.hidden = true;
 				showToast("The route map library could not load. Open the map to view your route.");
 				mapLink.href = route.url;
 				return;
@@ -783,20 +854,21 @@
 			mapEmpty.style.display = "none";
 			mapFrame.hidden = true;
 			suggestedMapElement.hidden = false;
+			routeMapKey.hidden = false;
+			routeMapKeyLabel.textContent = `${route.kind || "Route"} · ${Number(route.distance).toFixed(1)} km`;
 			mapLink.href = route.url;
-			if (!suggestedLeafletMap) {
-				suggestedLeafletMap = L.map(suggestedMapElement);
-				L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-					maxZoom: 19,
-					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-				}).addTo(suggestedLeafletMap);
+			if (!suggestedLeafletMap) suggestedLeafletMap = createSuggestedMap(suggestedMapElement);
+			suggestedRouteLayer = drawSuggestedRoute(suggestedLeafletMap, suggestedRouteLayer, route);
+		}
+
+		function previewSuggestedRoute(route) {
+			suggestionPreview.hidden = false;
+			if (!window.L) {
+				suggestionStatus.textContent = "Route found. The map preview could not load, but you can still save and open the route.";
+				return;
 			}
-			if (suggestedRouteLayer) suggestedLeafletMap.removeLayer(suggestedRouteLayer);
-			suggestedRouteLayer = L.geoJSON(route.geometry, {
-				style: { color: getComputedStyle(document.documentElement).getPropertyValue("--coral").trim(), weight: 5, opacity: 0.9 }
-			}).addTo(suggestedLeafletMap);
-			suggestedLeafletMap.fitBounds(suggestedRouteLayer.getBounds(), { padding: [24, 24] });
-			requestAnimationFrame(() => suggestedLeafletMap.invalidateSize());
+			if (!suggestionLeafletMap) suggestionLeafletMap = createSuggestedMap(suggestionMapElement);
+			suggestionRouteLayer = drawSuggestedRoute(suggestionLeafletMap, suggestionRouteLayer, route);
 		}
 
 		routeTabs.addEventListener("click", (event) => {
@@ -914,6 +986,12 @@
 			const targetDistance = suggestedDistance.valueAsNumber;
 			formError.textContent = "";
 			suggestionStatus.textContent = "";
+			suggestionPreview.hidden = true;
+			if (suggestionRouteLayer && suggestionLeafletMap) {
+				suggestionLeafletMap.removeLayer(suggestionRouteLayer);
+				suggestionRouteLayer = null;
+			}
+			pendingSuggestedRoute = null;
 			if (!activity) {
 				formError.textContent = "Choose walking / hiking, running, or cycling.";
 				suggestedActivity.focus();
@@ -964,9 +1042,10 @@
 				document.getElementById("route-name-input").value = `Suggested ${activity.label.toLowerCase()} (${pendingSuggestedRoute.distance.toFixed(1)} km)`;
 				document.getElementById("route-url-input").value = pendingSuggestedRoute.url;
 				suggestionStatus.textContent = `Found a ${pendingSuggestedRoute.distance.toFixed(1)} km ${activity.label.toLowerCase()} loop. Review the name and save it to your routes.`;
+				previewSuggestedRoute(pendingSuggestedRoute);
 			} catch (error) {
 				document.getElementById("form-error").textContent = error instanceof TypeError
-					? "Could not contact the walking route service. Check your connection and try again."
+					? "Could not contact the route service. Check your connection and try again."
 					: error.message;
 			} finally {
 				suggestRouteButton.disabled = false;
@@ -986,12 +1065,22 @@
 			}
 			pendingSuggestedRoute = null;
 			suggestionStatus.textContent = "";
+			suggestionPreview.hidden = true;
+			if (suggestionRouteLayer && suggestionLeafletMap) {
+				suggestionLeafletMap.removeLayer(suggestionRouteLayer);
+				suggestionRouteLayer = null;
+			}
 		}
 
 		document.getElementById("add-route").addEventListener("click", () => {
 			document.getElementById("form-error").textContent = "";
 			suggestionStatus.textContent = "";
 			pendingSuggestedRoute = null;
+			suggestionPreview.hidden = true;
+			if (suggestionRouteLayer && suggestionLeafletMap) {
+				suggestionLeafletMap.removeLayer(suggestionRouteLayer);
+				suggestionRouteLayer = null;
+			}
 			suggestedActivity.value = "";
 			suggestedDistance.value = "";
 			routeDialog.showModal();
@@ -1002,8 +1091,7 @@
 		suggestedDistance.addEventListener("input", invalidateSuggestedRoute);
 		document.getElementById("route-url-input").addEventListener("input", () => {
 			if (pendingSuggestedRoute && document.getElementById("route-url-input").value !== pendingSuggestedRoute.url) {
-				pendingSuggestedRoute = null;
-				suggestionStatus.textContent = "";
+				invalidateSuggestedRoute();
 			}
 		});
 		document.getElementById("close-dialog").addEventListener("click", () => routeDialog.close());
@@ -1030,11 +1118,17 @@
 				if (!route.name) throw new Error("Add a name for this route.");
 				routes.push(route);
 				persistRoutes();
-				selectRoute(route.id);
 				form.reset();
 				pendingSuggestedRoute = null;
 				suggestionStatus.textContent = "";
+				suggestionPreview.hidden = true;
 				routeDialog.close();
+				if (suggested && Number.isFinite(route.distance)) {
+					if (route.distance < Number(distanceMin.value)) distanceMin.value = String(route.distance);
+					if (route.distance > Number(distanceMax.value)) distanceMax.value = String(route.distance);
+					updateDistanceFilter();
+				}
+				selectRoute(route.id);
 				showToast("Route added to your library.");
 			} catch (error) {
 				errorElement.textContent = error instanceof TypeError ? "Enter a valid map URL or iframe embed." : error.message;
