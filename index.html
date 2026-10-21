@@ -233,10 +233,12 @@
 		.sidebar { display: flex; flex-direction: column; min-height: 590px; }
 		.count { color: var(--muted); font: 11px var(--mono); }
 		.route-list { padding: 10px; }
-		.route-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
-		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
-		.route-tabs[data-active-category="public"]::after { transform: translateX(100%); }
-		.route-tab { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 16px 8px; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700; cursor: pointer; }
+		.route-tabs { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+		.route-tabs::after { position: absolute; bottom: -1px; left: 0; width: 25%; height: 2px; background: var(--coral); content: ""; pointer-events: none; transition: transform .26s cubic-bezier(.2,.7,.25,1); }
+		.route-tabs[data-active-category="10k"]::after { transform: translateX(100%); }
+		.route-tabs[data-active-category="half"]::after { transform: translateX(200%); }
+		.route-tabs[data-active-category="marathon"]::after { transform: translateX(300%); }
+		.route-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 2px; border: 0; background: transparent; color: var(--muted); font-size: 10px; font-weight: 700; line-height: 1.2; cursor: pointer; }
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { font-size: 9px; }
@@ -394,7 +396,7 @@
 <body>
 	<header class="topbar">
 		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
-					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23182b1e'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23b7dc88'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%237eaa75'/%3E%3C/svg%3E" alt="" aria-hidden="true">
+					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<span class="brand-name">waymark</span>
 		</a>
 		<div class="topbar-actions">
@@ -419,12 +421,18 @@
 
 		<section class="workspace" aria-label="Route library and route map">
 			<aside class="sidebar" aria-label="Route library">
-				<div class="route-tabs" id="route-tabs" role="group" aria-label="Route categories">
-					<button class="route-tab" id="saved-routes-tab" type="button" aria-controls="route-list" aria-pressed="false">
-						Saved routes <span class="count" id="route-count">00</span>
+				<div class="route-tabs" id="route-tabs" role="group" aria-label="Run distance categories">
+					<button class="route-tab" type="button" data-category="5k" aria-label="5 kilometer runs" aria-controls="route-list" aria-pressed="false">
+						5 km <span class="count" id="category-count-5k">00</span>
 					</button>
-					<button class="route-tab" id="public-routes-tab" type="button" aria-controls="route-list" aria-pressed="false">
-						Public routes <span class="count" id="public-route-count">01</span>
+					<button class="route-tab" type="button" data-category="10k" aria-label="10 kilometer runs" aria-controls="route-list" aria-pressed="false">
+						10 km <span class="count" id="category-count-10k">00</span>
+					</button>
+					<button class="route-tab" type="button" data-category="half" aria-label="Half marathon runs" aria-controls="route-list" aria-pressed="false">
+						½ marathon <span class="count" id="category-count-half">00</span>
+					</button>
+					<button class="route-tab" type="button" data-category="marathon" aria-label="Marathon runs" aria-controls="route-list" aria-pressed="false">
+						Marathon <span class="count" id="category-count-marathon">00</span>
 					</button>
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
@@ -517,8 +525,6 @@
 		const themeStorageKey = "waymark-theme-v1";
 		const routeList = document.getElementById("route-list");
 		const routeTabs = document.getElementById("route-tabs");
-		const savedRoutesTab = document.getElementById("saved-routes-tab");
-		const publicRoutesTab = document.getElementById("public-routes-tab");
 		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
@@ -526,10 +532,22 @@
 		const routeDialog = document.getElementById("route-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const themeNames = ["forest", "light", "dark", "system"];
+		const distanceCategories = [
+			{ id: "5k", max: 5 },
+			{ id: "10k", max: 10 },
+			{ id: "half", max: 21.0975 },
+			{ id: "marathon", max: Infinity }
+		];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
-		let activeCategory = selectedId === starterRoute.id ? "public" : "saved";
+		let activeCategory = getDistanceCategory((routes.find((route) => route.id === selectedId) || starterRoute).distance);
 		let toastTimer;
+
+		function getDistanceCategory(distance) {
+			const kilometers = Number(distance);
+			if (!Number.isFinite(kilometers) || kilometers <= 0) return distanceCategories[0].id;
+			return distanceCategories.find((category) => kilometers <= category.max)?.id || "marathon";
+		}
 
 		function applyTheme(theme) {
 			document.documentElement.dataset.theme = theme;
@@ -583,19 +601,19 @@
 		function renderRoutes(animationDirection = "") {
 			routeList.replaceChildren();
 			routeList.classList.remove("category-forward", "category-back");
-			const savedRoutes = routes.filter((route) => route.id !== starterRoute.id);
-			document.getElementById("route-count").textContent = String(savedRoutes.length).padStart(2, "0");
-			document.getElementById("public-route-count").textContent = "01";
-			const showingSavedRoutes = activeCategory === "saved";
-			const categoryRoutes = showingSavedRoutes ? savedRoutes : [starterRoute];
+			distanceCategories.forEach((category) => {
+				const count = routes.filter((route) => getDistanceCategory(route.distance) === category.id).length;
+				document.getElementById(`category-count-${category.id}`).textContent = String(count).padStart(2, "0");
+			});
+			const categoryRoutes = routes.filter((route) => getDistanceCategory(route.distance) === activeCategory);
 			renderRouteList(categoryRoutes, routeList);
 			routeTabs.dataset.activeCategory = activeCategory;
 			if (animationDirection) {
 				routeList.classList.add(animationDirection);
 			}
-			savedRoutesTab.setAttribute("aria-pressed", String(showingSavedRoutes));
-			publicRoutesTab.setAttribute("aria-pressed", String(!showingSavedRoutes));
-			addRouteButton.hidden = !showingSavedRoutes;
+			routeTabs.querySelectorAll(".route-tab").forEach((tab) => {
+				tab.setAttribute("aria-pressed", String(tab.dataset.category === activeCategory));
+			});
 		}
 
 		function renderRouteList(categoryRoutes, list) {
@@ -649,7 +667,7 @@
 			const route = routes.find((entry) => entry.id === id);
 			if (!route) return;
 			selectedId = id;
-			activeCategory = route.id === starterRoute.id ? "public" : "saved";
+			activeCategory = getDistanceCategory(route.distance);
 			renderRoutes();
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
@@ -664,15 +682,13 @@
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
 
-		savedRoutesTab.addEventListener("click", () => {
-			if (activeCategory === "saved") return;
-			activeCategory = "saved";
-			renderRoutes("category-back");
-		});
-		publicRoutesTab.addEventListener("click", () => {
-			if (activeCategory === "public") return;
-			activeCategory = "public";
-			renderRoutes("category-forward");
+		routeTabs.addEventListener("click", (event) => {
+			const tab = event.target.closest(".route-tab");
+			if (!tab || tab.dataset.category === activeCategory) return;
+			const previousIndex = distanceCategories.findIndex((category) => category.id === activeCategory);
+			const nextIndex = distanceCategories.findIndex((category) => category.id === tab.dataset.category);
+			activeCategory = tab.dataset.category;
+			renderRoutes(nextIndex > previousIndex ? "category-forward" : "category-back");
 		});
 
 		function deleteRoute(id) {
