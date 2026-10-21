@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#f4f4f4">
 	<title>Waymark — route library</title>
-	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E">
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23000000'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -212,7 +212,7 @@
 			color: var(--topbar-text);
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
-		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; }
+		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; background: #000; }
 		.brand-name { font-size: 16px; }
 		.topbar-actions { display: flex; align-items: center; gap: 22px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
@@ -240,10 +240,22 @@
 		.route-tab[aria-pressed="true"] { color: var(--ink); }
 		.route-tab:focus-visible { outline: 2px solid var(--leaf); outline-offset: -3px; }
 		.route-tab .count { font-size: 9px; }
-		.route-filter { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-		.route-filter label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
-		.route-filter select { min-width: 0; padding: 7px 26px 7px 9px; border: 1px solid var(--input-border); border-radius: 7px; background: var(--input-bg); color: var(--ink); font-size: 11px; cursor: pointer; }
-		.route-filter select:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+		.route-filter { display: grid; gap: 9px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+		.distance-label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
+		.distance-filter { display: grid; gap: 4px; }
+		.distance-values, .distance-scale { display: flex; justify-content: space-between; color: var(--secondary-text); font: 10px var(--mono); }
+		.distance-slider { position: relative; height: 22px; margin: 0 8px; }
+		.distance-track, .distance-range { position: absolute; top: 9px; height: 4px; border-radius: 4px; }
+		.distance-track { right: 0; left: 0; background: var(--line); }
+		.distance-range { left: var(--range-start); width: calc(var(--range-end) - var(--range-start)); background: var(--coral); }
+		.distance-slider input { position: absolute; top: 0; left: 0; width: 100%; height: 22px; margin: 0; appearance: none; background: transparent; pointer-events: none; }
+		.distance-slider input::-webkit-slider-runnable-track { height: 4px; background: transparent; }
+		.distance-slider input::-moz-range-track { height: 4px; background: transparent; }
+		.distance-slider input::-webkit-slider-thumb { width: 16px; height: 16px; margin-top: -6px; appearance: none; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
+		.distance-slider input::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid var(--white); border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 1px var(--coral); cursor: pointer; pointer-events: auto; }
+		.distance-slider input:focus-visible { outline: none; }
+		.distance-slider input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
+		.distance-slider input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
 		.route-item {
 			position: relative;
 			width: 100%;
@@ -289,6 +301,10 @@
 		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px/1.6 var(--mono); letter-spacing: .035em; }
 		.map-panel { min-width: 0; overflow: hidden; }
 		.map-heading { min-height: 75px; padding: 17px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
+		.map-actions { display: flex; flex: none; align-items: center; gap: 8px; }
+		.map-action { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer; transition: background .16s ease; }
+		.map-action:hover { background: var(--hover); }
+		.map-action:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.map-title { min-width: 0; }
 		.map-title h2 { margin: 0 0 5px; overflow: hidden; font-size: 17px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
@@ -382,7 +398,8 @@
 			.route-category-head { padding: 16px 16px 7px; }
 			.map-heading { min-height: 68px; padding: 13px 15px; }
 			.map-title h2 { font-size: 15px; }
-			.open-map { padding: 8px 9px; font-size: 10px; }
+			.map-actions { gap: 6px; }
+			.map-action { padding: 8px 9px; font-size: 10px; }
 			.map-frame { aspect-ratio: 1 / 1.04; min-height: 350px; }
 			.map-frame iframe { min-height: 350px; }
 			.stats { flex-wrap: wrap; }
@@ -398,7 +415,7 @@
 <body>
 	<header class="topbar">
 		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
-					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
+			<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23000000'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<span class="brand-name">waymark</span>
 		</a>
 		<div class="topbar-actions">
@@ -432,14 +449,17 @@
 					</button>
 				</div>
 				<div class="route-filter">
-					<label for="distance-filter">Distance</label>
-					<select id="distance-filter" aria-label="Filter routes by distance class">
-						<option value="all">All distances</option>
-						<option value="5k">5 km</option>
-						<option value="10k">10 km</option>
-						<option value="half">21.0975 km (half marathon)</option>
-						<option value="marathon">42.195 km (marathon)</option>
-					</select>
+					<span class="distance-label">Distance</span>
+					<div class="distance-filter">
+						<div class="distance-values"><output id="distance-min-value" for="distance-min">0 km</output><output id="distance-max-value" for="distance-max">50 km</output></div>
+						<div class="distance-slider" id="distance-slider" style="--range-start: 0%; --range-end: 100%;">
+							<div class="distance-track" aria-hidden="true"></div>
+							<div class="distance-range" aria-hidden="true"></div>
+							<input id="distance-min" type="range" min="0" max="50" step="0.1" value="0" aria-label="Minimum route distance">
+							<input id="distance-max" type="range" min="0" max="50" step="0.1" value="50" aria-label="Maximum route distance">
+						</div>
+						<div class="distance-scale" aria-hidden="true"><span>0 km</span><span>50 km</span></div>
+					</div>
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
 				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
@@ -452,12 +472,15 @@
 						<h2 id="active-name">Riverside Loop</h2>
 						<p id="active-kind">WALK · ROUTE 01</p>
 					</div>
-					<a class="open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
+					<div class="map-actions">
+						<button class="map-action" id="location-button" type="button">My location</button>
+						<a class="map-action open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
+					</div>
 				</div>
 				<div class="map-frame" id="map-frame">
 					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
 					<div class="map-empty" id="map-empty">
-						<div class="empty-inner"><strong>Route saved.</strong><span>This map link can’t be embedded here. Open the map to view it on its original site.</span></div>
+						<div class="empty-inner"><strong>Map unavailable.</strong><span>This map can’t be displayed here. Open it to view it on its original site.</span></div>
 					</div>
 				</div>
 				<div class="stats" aria-label="Route details">
@@ -533,32 +556,22 @@
 		const routeTabs = document.getElementById("route-tabs");
 		const savedRoutesTab = document.getElementById("saved-routes-tab");
 		const publicRoutesTab = document.getElementById("public-routes-tab");
-		const distanceFilter = document.getElementById("distance-filter");
+		const distanceSlider = document.getElementById("distance-slider");
+		const distanceMin = document.getElementById("distance-min");
+		const distanceMax = document.getElementById("distance-max");
 		const addRouteButton = document.getElementById("add-route");
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
+		const locationButton = document.getElementById("location-button");
 		const routeDialog = document.getElementById("route-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const themeNames = ["forest", "light", "dark", "system"];
-		const distanceCategories = [
-			{ id: "5k", distance: 5 },
-			{ id: "10k", distance: 10 },
-			{ id: "half", distance: 21.0975 },
-			{ id: "marathon", distance: 42.195 }
-		];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
-		let activeCategory = selectedId === starterRoute.id ? "public" : "mine";
+		let activeCategory = "mine";
+		let showingLocation = false;
 		let toastTimer;
-
-		function getDistanceCategory(distance) {
-			const kilometers = Number(distance);
-			if (!Number.isFinite(kilometers) || kilometers <= 0) return null;
-			return distanceCategories.reduce((nearest, category) =>
-				Math.abs(kilometers - category.distance) < Math.abs(kilometers - nearest.distance) ? category : nearest
-			).id;
-		}
 
 		function applyTheme(theme) {
 			document.documentElement.dataset.theme = theme;
@@ -617,7 +630,12 @@
 			document.getElementById("route-count").textContent = String(myRoutes.length).padStart(2, "0");
 			document.getElementById("public-route-count").textContent = String(publicRoutes.length).padStart(2, "0");
 			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
-			const categoryRoutes = activeRoutes.filter((route) => distanceFilter.value === "all" || getDistanceCategory(route.distance) === distanceFilter.value);
+			const minimumDistance = Number(distanceMin.value);
+			const maximumDistance = Number(distanceMax.value);
+			const categoryRoutes = activeRoutes.filter((route) => {
+				const distance = Number(route.distance);
+				return Number.isFinite(distance) && distance >= minimumDistance && distance <= maximumDistance;
+			});
 			renderRouteList(categoryRoutes, routeList);
 			routeTabs.dataset.activeCategory = activeCategory;
 			if (animationDirection) {
@@ -680,13 +698,15 @@
 			const route = routes.find((entry) => entry.id === id);
 			if (!route) return;
 			selectedId = id;
-			activeCategory = route.id === starterRoute.id ? "public" : "mine";
 			renderRoutes();
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
+			showingLocation = false;
+			locationButton.textContent = "My location";
+			locationButton.setAttribute("aria-label", "Show my location on the map");
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
 			mapFrame.hidden = false;
@@ -694,6 +714,60 @@
 			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
+
+		function showLocationOnMap(position) {
+			const { latitude, longitude } = position.coords;
+			const latitudeOffset = 0.01;
+			const longitudeOffset = Math.min(0.05, latitudeOffset / Math.max(Math.cos(latitude * Math.PI / 180), 0.2));
+			const locationUrl = new URL("https://www.openstreetmap.org/export/embed.html");
+			locationUrl.searchParams.set("bbox", [
+				longitude - longitudeOffset,
+				latitude - latitudeOffset,
+				longitude + longitudeOffset,
+				latitude + latitudeOffset
+			].join(","));
+			locationUrl.searchParams.set("layer", "mapnik");
+			locationUrl.searchParams.set("marker", `${latitude},${longitude}`);
+			mapFrame.src = locationUrl.href;
+			mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
+			mapFrame.hidden = false;
+			mapEmpty.style.display = "none";
+			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
+			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
+			showingLocation = true;
+			locationButton.textContent = "Show route";
+			locationButton.setAttribute("aria-label", "Return to the selected route map");
+		}
+
+		locationButton.addEventListener("click", () => {
+			if (showingLocation) {
+				selectRoute(selectedId);
+				return;
+			}
+			if (!navigator.geolocation) {
+				showToast("Location is not available in this browser.");
+				return;
+			}
+			locationButton.disabled = true;
+			locationButton.textContent = "Locating…";
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					locationButton.disabled = false;
+					showLocationOnMap(position);
+				},
+				(error) => {
+					locationButton.disabled = false;
+					locationButton.textContent = "My location";
+					const message = error.code === error.PERMISSION_DENIED
+						? "Location permission was denied."
+						: error.code === error.POSITION_UNAVAILABLE
+							? "Your location is unavailable."
+							: "Location request timed out.";
+					showToast(message);
+				},
+				{ enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+			);
+		});
 
 		routeTabs.addEventListener("click", (event) => {
 			const tab = event.target.closest(".route-tab");
@@ -703,7 +777,19 @@
 			activeCategory = tab.dataset.category;
 			renderRoutes(nextIndex > previousIndex ? "category-forward" : "category-back");
 		});
-		distanceFilter.addEventListener("change", () => renderRoutes());
+		function updateDistanceFilter(changedInput) {
+			distanceMin.max = distanceMax.value;
+			distanceMax.min = distanceMin.value;
+			const minimum = Number(distanceMin.value);
+			const maximum = Number(distanceMax.value);
+			document.getElementById("distance-min-value").value = `${minimum.toFixed(1).replace(/\.0$/, "")} km`;
+			document.getElementById("distance-max-value").value = `${maximum.toFixed(1).replace(/\.0$/, "")} km`;
+			distanceSlider.style.setProperty("--range-start", `${minimum / 50 * 100}%`);
+			distanceSlider.style.setProperty("--range-end", `${maximum / 50 * 100}%`);
+			if (changedInput) renderRoutes();
+		}
+		distanceMin.addEventListener("input", () => updateDistanceFilter(distanceMin));
+		distanceMax.addEventListener("input", () => updateDistanceFilter(distanceMax));
 
 		function deleteRoute(id) {
 			routes = routes.filter((route) => route.id !== id);
@@ -788,6 +874,7 @@
 			}
 		});
 
+		updateDistanceFilter();
 		renderRoutes();
 		selectRoute(selectedId);
 	</script>
