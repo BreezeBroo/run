@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="#edf3ed">
+	<meta name="theme-color" content="#f4f4f4">
 	<title>Waymark — route library</title>
 	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +20,7 @@
 			--forest: #214a38;
 			--leaf: #b7dc88;
 			--coral: #d9785e;
-			--topbar-text: #f7fbf6;
+			--topbar-text: #f0f7f0;
 			--eyebrow: #668071;
 			--intro-copy: #6d7d73;
 			--hover: #f1f6f0;
@@ -50,36 +50,37 @@
 		:root[data-theme="light"],
 		:root[data-theme="system"] {
 			color-scheme: light;
-			--ink: #292b2d;
-			--muted: #6d7073;
-			--paper: #f4f4f1;
+			--ink: #292929;
+			--muted: #707070;
+			--paper: #f4f4f4;
 			--white: #ffffff;
-			--line: #dedfdb;
-			--forest: #e5e6e2;
-			--leaf: #d8bd62;
-			--coral: #c56e57;
-			--topbar-text: #303332;
-			--eyebrow: #626866;
-			--intro-copy: #717674;
-			--hover: #ededeb;
-			--active: #eeeee9;
-			--active-border: #d9d7cc;
-			--route-distance: #656963;
-			--secondary-text: #737774;
-			--quiet-text: #858985;
-			--button-text: #424644;
-			--button-bg: #f8f8f6;
-			--input-bg: #fdfdfb;
-			--input-border: #d8d9d5;
-			--field-label: #666a67;
-			--focus-ring: #d8bd6255;
-			--map-bg: #e7e8e4;
-			--empty-copy: #717674;
-			--stat-value: #343735;
-			--dialog-border: #dedfdb;
-			--backdrop: #292d2bb8;
-			--shadow: 0 18px 55px #292d2b16;
-			--danger: #bc5945;
+			--line: #dedede;
+			--forest: #e5e5e5;
+			--leaf: #dedede;
+			--coral: #666666;
+			--topbar-text: #303030;
+			--eyebrow: #626262;
+			--intro-copy: #717171;
+			--hover: #ededed;
+			--active: #eeeeee;
+			--active-border: #d8d8d8;
+			--route-distance: #656565;
+			--secondary-text: #737373;
+			--quiet-text: #858585;
+			--button-text: #424242;
+			--button-bg: #f8f8f8;
+			--input-bg: #fdfdfd;
+			--input-border: #d8d8d8;
+			--field-label: #666666;
+			--focus-ring: #88888855;
+			--map-bg: #e7e7e7;
+			--empty-copy: #717171;
+			--stat-value: #343434;
+			--dialog-border: #dedede;
+			--backdrop: #292929b8;
+			--shadow: 0 18px 55px #29292916;
+			--danger: #555555;
+			--save-text: #252525;
 		}
 
 		:root[data-theme="forest"] {
@@ -91,8 +92,8 @@
 			--line: #34483a;
 			--forest: #102d1d;
 			--leaf: #b7dc88;
-			--coral: #f08b70;
-			--topbar-text: #f7fbf6;
+			--coral: #9acb9c;
+			--topbar-text: #f0f7f0;
 			--eyebrow: #a7b8aa;
 			--intro-copy: #abb8ae;
 			--hover: #26362b;
@@ -111,77 +112,81 @@
 			--empty-copy: #b1beb3;
 			--stat-value: #e1ebde;
 			--dialog-border: #425148;
-			--backdrop: #101a14d9;
-			--shadow: 0 24px 80px #0009;
-			--danger: #ff9a84;
+			--backdrop: #07140bcf;
+			--shadow: 0 24px 80px #04100899;
+			--danger: #b7dc88;
+			--save-text: #102d1d;
 		}
 
 		:root[data-theme="dark"] {
 			color-scheme: dark;
-			--ink: #f0f0ee;
-			--muted: #b3b3b0;
-			--paper: #111211;
-			--white: #1e1f1e;
-			--line: #393a39;
-			--forest: #090a09;
-			--leaf: #d0d0ca;
-			--coral: #d7d7d1;
-			--topbar-text: #f7f7f5;
-			--eyebrow: #bcbcb7;
-			--intro-copy: #b0b0ac;
-			--hover: #292a29;
-			--active: #303130;
-			--active-border: #535451;
-			--route-distance: #d0d0ca;
-			--secondary-text: #b6b6b1;
-			--quiet-text: #9f9f9a;
-			--button-text: #e1e1dc;
-			--button-bg: #272827;
-			--input-bg: #191a19;
-			--input-border: #484948;
-			--field-label: #c7c7c2;
-			--focus-ring: #deded844;
-			--map-bg: #292a29;
-			--empty-copy: #b8b8b3;
-			--stat-value: #e6e6e1;
-			--dialog-border: #444544;
+			--ink: #f0f0f0;
+			--muted: #b3b3b3;
+			--paper: #111111;
+			--white: #1e1e1e;
+			--line: #393939;
+			--forest: #090909;
+			--leaf: #d0d0d0;
+			--coral: #d7d7d7;
+			--topbar-text: #f7f7f7;
+			--eyebrow: #bcbcbc;
+			--intro-copy: #b0b0b0;
+			--hover: #292929;
+			--active: #303030;
+			--active-border: #535353;
+			--route-distance: #d0d0d0;
+			--secondary-text: #b6b6b6;
+			--quiet-text: #9f9f9f;
+			--button-text: #e1e1e1;
+			--button-bg: #272727;
+			--input-bg: #191919;
+			--input-border: #484848;
+			--field-label: #c7c7c7;
+			--focus-ring: #dedede44;
+			--map-bg: #292929;
+			--empty-copy: #b8b8b8;
+			--stat-value: #e6e6e6;
+			--dialog-border: #444444;
 			--backdrop: #050505d9;
 			--shadow: 0 24px 80px #0009;
-			--danger: #ff9a84;
+			--danger: #b0b0b0;
+			--save-text: #111111;
 		}
 
 		@media (prefers-color-scheme: dark) {
 			:root[data-theme="system"] {
 				color-scheme: dark;
-				--ink: #f0f0ee;
-				--muted: #b3b3b0;
-				--paper: #111211;
-				--white: #1e1f1e;
-				--line: #393a39;
-				--forest: #090a09;
-				--leaf: #d0d0ca;
-				--coral: #d7d7d1;
-				--eyebrow: #bcbcb7;
-				--intro-copy: #b0b0ac;
-				--hover: #292a29;
-				--active: #303130;
-				--active-border: #535451;
-				--route-distance: #d0d0ca;
-				--secondary-text: #b6b6b1;
-				--quiet-text: #9f9f9a;
-				--button-text: #e1e1dc;
-				--button-bg: #272827;
-				--input-bg: #191a19;
-				--input-border: #484948;
-				--field-label: #c7c7c2;
-				--focus-ring: #deded844;
-				--map-bg: #292a29;
-				--empty-copy: #b8b8b3;
-				--stat-value: #e6e6e1;
-				--dialog-border: #444544;
+				--ink: #f0f0f0;
+				--muted: #b3b3b3;
+				--paper: #111111;
+				--white: #1e1e1e;
+				--line: #393939;
+				--forest: #090909;
+				--leaf: #d0d0d0;
+				--coral: #d7d7d7;
+				--topbar-text: #f7f7f7;
+				--eyebrow: #bcbcbc;
+				--intro-copy: #b0b0b0;
+				--hover: #292929;
+				--active: #303030;
+				--active-border: #535353;
+				--route-distance: #d0d0d0;
+				--secondary-text: #b6b6b6;
+				--quiet-text: #9f9f9f;
+				--button-text: #e1e1e1;
+				--button-bg: #272727;
+				--input-bg: #191919;
+				--input-border: #484848;
+				--field-label: #c7c7c7;
+				--focus-ring: #dedede44;
+				--map-bg: #292929;
+				--empty-copy: #b8b8b8;
+				--stat-value: #e6e6e6;
+				--dialog-border: #444444;
 				--backdrop: #050505d9;
 				--shadow: 0 24px 80px #0009;
-				--danger: #ff9a84;
+				--danger: #b0b0b0;
+				--save-text: #111111;
 			}
 		}
 
@@ -207,7 +212,8 @@
 			color: var(--topbar-text);
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
-		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; }
+		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; filter: grayscale(1); }
+		:root[data-theme="forest"] .brand-mark { filter: none; }
 		.brand-name { font-size: 16px; }
 		.topbar-actions { display: flex; align-items: center; gap: 22px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
@@ -216,6 +222,8 @@
 		.settings-button:hover { border-color: #ffffff75; background: #ffffff20; }
 		.settings-button:focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; }
 		.settings-button svg { width: 20px; height: 20px; }
+		:root[data-theme="forest"] .settings-button { border-color: #36583d; background: #193625; }
+		:root[data-theme="forest"] .settings-button:hover { border-color: #628565; background: #25412e; }
 		.page { max-width: 1480px; margin: auto; padding: 48px 5.2vw 44px; }
 		.intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 		.eyebrow { margin: 0 0 11px; color: var(--eyebrow); font: 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
@@ -313,7 +321,7 @@
 		.form-actions button { min-height: 39px; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); font-size: 12px; font-weight: 700; cursor: pointer; }
 		.form-actions .create-route { display: inline-flex; align-items: center; min-height: 39px; margin-right: auto; padding: 0 15px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 12px; font-weight: 700; text-decoration: none; }
 		.form-actions .create-route:hover { background: var(--hover); }
-		.form-actions .save-route { border-color: var(--leaf); background: var(--leaf); color: #20352a; }
+		.form-actions .save-route { border-color: var(--leaf); background: var(--leaf); color: var(--save-text); }
 		.form-actions .save-route:hover { filter: brightness(1.04); }
 		.toast { position: fixed; right: 22px; bottom: 20px; z-index: 2; padding: 12px 16px; border-radius: 10px; background: var(--forest); color: var(--topbar-text); font-size: 12px; box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 		.toast.show { opacity: 1; transform: translateY(0); }
@@ -327,11 +335,19 @@
 		.theme-option input:checked + label { border-color: var(--route-distance); background: var(--active); }
 		.theme-option input:checked + label::after { border: 5px solid var(--route-distance); background: var(--white); }
 		.theme-option input:focus-visible + label { outline: 2px solid var(--coral); outline-offset: 2px; }
-		.theme-swatch { display: block; width: 32px; height: 32px; flex: none; border: 1px solid #0002; border-radius: 8px; box-shadow: inset 0 0 0 1px #ffffff20, 0 1px 3px #0002; }
-		.theme-swatch.forest { background: #17452b; border-color: #123820; }
-		.theme-swatch.dark { background: #111111; border-color: #000000; }
-		.theme-swatch.light { background: #ffffff; border-color: #c9cbc8; }
-		.theme-swatch.system { background: linear-gradient(90deg, #ffffff 0 50%, #111111 50%); border-color: #858785; }
+		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
+		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
+		.theme-swatch.dark { --preview-accent: #090909; --preview-muted: #777777; --preview-surface: #1e1e1e; --preview-map: #292929; --preview-route: #d7d7d7; }
+		.theme-swatch.system { --preview-surface: #1e1e1e; }
+		.theme-preview-chrome { border-radius: 2px; background: var(--preview-accent); }
+		.theme-preview-body { display: grid; min-height: 0; grid-template-columns: 12px 1fr; gap: 3px; }
+		.theme-preview-nav { border-radius: 2px; background: repeating-linear-gradient(to bottom, var(--preview-muted) 0 2px, transparent 2px 4px); }
+		.theme-preview-map { position: relative; overflow: hidden; border-radius: 2px; background: var(--preview-map); }
+		.theme-preview-map::after { position: absolute; top: 45%; left: 22%; width: 65%; height: 2px; border-radius: 2px; background: var(--preview-route); content: ""; transform: rotate(-28deg); }
+		.theme-swatch.system .theme-preview-chrome { background: linear-gradient(90deg, #e5e5e5 0 50%, #090909 50%); }
+		.theme-swatch.system .theme-preview-nav { background: linear-gradient(90deg, #bcbcbc 0 50%, #777777 50%); }
+		.theme-swatch.system .theme-preview-map { background: linear-gradient(90deg, #e7e7e7 0 50%, #292929 50%); }
+		.theme-swatch.system .theme-preview-map::after { background: linear-gradient(90deg, #666666 0 50%, #d7d7d7 50%); }
 		.theme-option-copy { display: grid; gap: 3px; }
 		.theme-option-copy strong { font-size: 13px; font-weight: 700; }
 		.theme-option-copy span { color: var(--muted); font-size: 11px; }
@@ -379,17 +395,15 @@
 <body>
 	<header class="topbar">
 		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
-					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%2318251f'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
+					<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23182b1e'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23b7dc88'/%3E%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%237eaa75'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<span class="brand-name">waymark</span>
 		</a>
 		<div class="topbar-actions">
 			<span class="top-note">Your route library</span>
 			<button class="settings-button" id="settings-button" type="button" aria-label="Open appearance settings" aria-haspopup="dialog" aria-controls="settings-dialog" title="Appearance settings">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M4 7h16M4 17h16M4 12h16"></path>
-					<circle cx="9" cy="7" r="2" fill="var(--forest)" stroke="currentColor"></circle>
-					<circle cx="15" cy="12" r="2" fill="var(--forest)" stroke="currentColor"></circle>
-					<circle cx="11" cy="17" r="2" fill="var(--forest)" stroke="currentColor"></circle>
+					<path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"></path>
+					<path d="m19.4 15 .1.1a1.8 1.8 0 1 1-2.55 2.55l-.1-.1a1.8 1.8 0 0 0-3.07 1.27v.28a1.8 1.8 0 1 1-3.6 0v-.15a1.8 1.8 0 0 0-3.07-1.27l-.1.1a1.8 1.8 0 1 1-2.55-2.55l.1-.1a1.8 1.8 0 0 0-1.27-3.07h-.28a1.8 1.8 0 1 1 0-3.6h.15a1.8 1.8 0 0 0 1.27-3.07l-.1-.1a1.8 1.8 0 1 1 2.55-2.55l.1.1a1.8 1.8 0 0 0 3.07-1.27v-.28a1.8 1.8 0 1 1 3.6 0v.15a1.8 1.8 0 0 0 3.07 1.27l.1-.1a1.8 1.8 0 1 1 2.55 2.55l-.1.1a1.8 1.8 0 0 0 1.27 3.07h.28a1.8 1.8 0 1 1 0 3.6h-.15A1.8 1.8 0 0 0 19.4 15Z"></path>
 				</svg>
 			</button>
 		</div>
@@ -473,19 +487,19 @@
 		<div class="theme-options" role="radiogroup" aria-label="Color theme">
 			<div class="theme-option">
 				<input id="theme-forest" name="theme" type="radio" value="forest">
-				<label for="theme-forest"><span class="theme-swatch forest" aria-hidden="true"></span><span class="theme-option-copy"><strong>Forest</strong><span>Soft greens and trail-inspired accents</span></span></label>
+				<label for="theme-forest"><span class="theme-swatch forest" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Forest</strong><span>Deep greens from canopy to trail</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-light" name="theme" type="radio" value="light">
-				<label for="theme-light"><span class="theme-swatch light" aria-hidden="true"></span><span class="theme-option-copy"><strong>Light</strong><span>Clean, bright surfaces with charcoal details</span></span></label>
+				<label for="theme-light"><span class="theme-swatch light" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Light</strong><span>Soft whites with quiet gray details</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-dark" name="theme" type="radio" value="dark">
-				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"></span><span class="theme-option-copy"><strong>Dark</strong><span>Monochrome charcoal for low-light spaces</span></span></label>
+				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Dark</strong><span>Layered charcoal for low-light spaces</span></span></label>
 			</div>
 			<div class="theme-option">
 				<input id="theme-system" name="theme" type="radio" value="system">
-				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
+				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
 			</div>
 		</div>
 	</dialog>
