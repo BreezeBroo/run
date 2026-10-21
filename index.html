@@ -448,10 +448,10 @@
 			<aside class="sidebar" aria-label="Route library">
 				<div class="route-tabs" id="route-tabs" role="group" aria-label="Route ownership">
 					<button class="route-tab" id="saved-routes-tab" type="button" data-category="mine" aria-controls="route-list" aria-pressed="false">
-						My routes <span class="count" id="route-count">(00)</span>
+						My routes <span class="count" id="route-count">(0)</span>
 					</button>
 					<button class="route-tab" id="public-routes-tab" type="button" data-category="public" aria-controls="route-list" aria-pressed="false">
-						Public routes <span class="count" id="public-route-count">(00)</span>
+						Public routes <span class="count" id="public-route-count">(0)</span>
 					</button>
 				</div>
 				<div class="route-filter">
@@ -629,8 +629,8 @@
 			routeList.classList.remove("category-forward", "category-back");
 			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
 			const publicRoutes = routes.filter((route) => route.id === starterRoute.id);
-			document.getElementById("route-count").textContent = `(${String(myRoutes.length).padStart(2, "0")})`;
-			document.getElementById("public-route-count").textContent = `(${String(publicRoutes.length).padStart(2, "0")})`;
+			document.getElementById("route-count").textContent = `(${myRoutes.length})`;
+			document.getElementById("public-route-count").textContent = `(${publicRoutes.length})`;
 			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
 			const minimumDistance = Number(distanceMin.value);
 			const maximumDistance = Number(distanceMax.value);
