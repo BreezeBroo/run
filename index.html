@@ -212,7 +212,8 @@
 			color: var(--topbar-text);
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
-		.brand-mark { display: block; width: 27px; height: 27px; border-radius: 7px; background: #000; }
+		.brand-mark { display: block; width: 27px; height: 27px; flex: none; border-radius: 7px; background: #000; }
+		.brand img.brand-mark { display: none; }
 		.brand-name { font-size: 16px; }
 		.topbar-actions { display: flex; align-items: center; gap: 22px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
@@ -243,7 +244,7 @@
 		.route-filter { display: grid; gap: 9px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 		.distance-label { color: var(--quiet-text); font: 9px var(--mono); text-transform: uppercase; }
 		.distance-filter { display: grid; gap: 4px; }
-		.distance-values, .distance-scale { display: flex; justify-content: space-between; color: var(--secondary-text); font: 10px var(--mono); }
+		.distance-values { display: flex; justify-content: space-between; color: var(--secondary-text); font: 10px var(--mono); }
 		.distance-slider { position: relative; height: 22px; margin: 0 8px; }
 		.distance-track, .distance-range { position: absolute; top: 9px; height: 4px; border-radius: 4px; }
 		.distance-track { right: 0; left: 0; background: var(--line); }
@@ -416,6 +417,11 @@
 	<header class="topbar">
 		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
 			<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23000000'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
+			<svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+				<rect width="40" height="40" rx="11" fill="#000000"></rect>
+				<path d="M10 29 29 10l-5 15-14 4Z" fill="#d4f06b"></path>
+				<path d="m19 21 10-11-4 15-6-4Z" fill="#ff8069"></path>
+			</svg>
 			<span class="brand-name">waymark</span>
 		</a>
 		<div class="topbar-actions">
@@ -458,7 +464,6 @@
 							<input id="distance-min" type="range" min="0" max="50" step="0.1" value="0" aria-label="Minimum route distance">
 							<input id="distance-max" type="range" min="0" max="50" step="0.1" value="50" aria-label="Maximum route distance">
 						</div>
-						<div class="distance-scale" aria-hidden="true"><span>0 km</span><span>50 km</span></div>
 					</div>
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
@@ -473,7 +478,6 @@
 						<p id="active-kind">WALK · ROUTE 01</p>
 					</div>
 					<div class="map-actions">
-						<button class="map-action" id="location-button" type="button">My location</button>
 						<a class="map-action open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
 					</div>
 				</div>
@@ -563,14 +567,12 @@
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
-		const locationButton = document.getElementById("location-button");
 		const routeDialog = document.getElementById("route-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const themeNames = ["forest", "light", "dark", "system"];
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
 		let activeCategory = "mine";
-		let showingLocation = false;
 		let toastTimer;
 
 		function applyTheme(theme) {
@@ -704,9 +706,6 @@
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
-			showingLocation = false;
-			locationButton.textContent = "My location";
-			locationButton.setAttribute("aria-label", "Show my location on the map");
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
 			mapFrame.hidden = false;
@@ -714,60 +713,6 @@
 			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
 			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
-
-		function showLocationOnMap(position) {
-			const { latitude, longitude } = position.coords;
-			const latitudeOffset = 0.01;
-			const longitudeOffset = Math.min(0.05, latitudeOffset / Math.max(Math.cos(latitude * Math.PI / 180), 0.2));
-			const locationUrl = new URL("https://www.openstreetmap.org/export/embed.html");
-			locationUrl.searchParams.set("bbox", [
-				longitude - longitudeOffset,
-				latitude - latitudeOffset,
-				longitude + longitudeOffset,
-				latitude + latitudeOffset
-			].join(","));
-			locationUrl.searchParams.set("layer", "mapnik");
-			locationUrl.searchParams.set("marker", `${latitude},${longitude}`);
-			mapFrame.src = locationUrl.href;
-			mapLink.href = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
-			mapFrame.hidden = false;
-			mapEmpty.style.display = "none";
-			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
-			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
-			showingLocation = true;
-			locationButton.textContent = "Show route";
-			locationButton.setAttribute("aria-label", "Return to the selected route map");
-		}
-
-		locationButton.addEventListener("click", () => {
-			if (showingLocation) {
-				selectRoute(selectedId);
-				return;
-			}
-			if (!navigator.geolocation) {
-				showToast("Location is not available in this browser.");
-				return;
-			}
-			locationButton.disabled = true;
-			locationButton.textContent = "Locating…";
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					locationButton.disabled = false;
-					showLocationOnMap(position);
-				},
-				(error) => {
-					locationButton.disabled = false;
-					locationButton.textContent = "My location";
-					const message = error.code === error.PERMISSION_DENIED
-						? "Location permission was denied."
-						: error.code === error.POSITION_UNAVAILABLE
-							? "Your location is unavailable."
-							: "Location request timed out.";
-					showToast(message);
-				},
-				{ enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-			);
-		});
 
 		routeTabs.addEventListener("click", (event) => {
 			const tab = event.target.closest(".route-tab");
