@@ -343,10 +343,6 @@
 		.map-title h2 { margin: 0 0 5px; overflow: hidden; font: 600 19px/1.15 var(--serif); letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
 		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
 		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; }
-		.open-map-arrow { position: relative; display: inline-block; width: .8em; height: .8em; flex: none; color: currentColor; }
-		.open-map-arrow::before { position: absolute; top: 50%; right: .08em; left: 0; border-top: 1.5px solid currentColor; content: ""; transform: translateY(-50%); }
-		.open-map-arrow::after { position: absolute; top: 50%; right: .08em; width: .34em; height: .34em; border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; content: ""; transform: translateY(-50%) rotate(45deg); }
-		.map-action.open-map { display: inline-flex; align-items: center; gap: 5px; }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
 		.map-frame.is-empty iframe, .map-frame.is-empty .map-loading { display: none; }
@@ -463,7 +459,6 @@
 			.route-drag-handle svg { width: 17px; height: 17px; }
 			.route-actions { right: 9px; bottom: 11px; gap: 4px; }
 			.route-action { min-height: 26px; padding: 3px 5px; font-size: 10px; opacity: 1; }
-			.open-map-arrow { width: 12px; height: 12px; }
 			.add-route { margin-top: 0; }
 			.side-foot { display: flex; }
 			.map-frame, .map-frame iframe { min-height: 360px; }
@@ -566,7 +561,7 @@
 					</div>
 					<div class="map-actions">
 						<button class="map-action" id="share-route" type="button" aria-label="Share selected route" hidden>SHARE</button>
-						<a class="map-action open-map" id="open-map" href="#" target="_blank" rel="noreferrer" hidden>OPEN MAP <span class="open-map-arrow" aria-hidden="true"></span></a>
+						<a class="map-action open-map" id="open-map" href="#" target="_blank" rel="noreferrer" hidden>OPEN MAP</a>
 					</div>
 				</div>
 				<div class="map-frame is-empty" id="map-frame">
