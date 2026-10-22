@@ -454,7 +454,8 @@
 			.route-drag-handle { position: absolute; top: 50%; left: 9px; z-index: 1; display: grid; width: 36px; height: 40px; place-items: center; padding: 0; transform: translateY(-50%); border: 0; border-radius: 6px; background: transparent; color: var(--quiet-text); cursor: grab; touch-action: none; }
 			.route-drag-handle:active { background: var(--hover); cursor: grabbing; }
 			.route-drag-handle svg { width: 17px; height: 17px; }
-			.route-action { min-height: 32px; padding: 6px 8px; font-size: 11px; opacity: 1; }
+			.route-actions { right: 9px; bottom: 11px; gap: 4px; }
+			.route-action { min-height: 26px; padding: 3px 5px; font-size: 10px; opacity: 1; }
 			.add-route { margin-top: 0; }
 			.side-foot { display: flex; }
 			.map-frame, .map-frame iframe { min-height: 360px; }
@@ -475,8 +476,12 @@
 			.map-title h2 { font-size: 15px; }
 			.map-actions { gap: 6px; }
 			.map-action { padding: 8px 9px; font-size: 10px; }
+			.open-map-arrow { width: 12px; height: 12px; }
+			.map-action.open-map { display: inline-flex; align-items: center; gap: 4px; }
 			.map-frame { aspect-ratio: 1 / 1.04; min-height: 350px; }
 			.map-frame iframe { min-height: 350px; }
+			.route-actions { right: 8px; bottom: 10px; gap: 3px; }
+			.route-action { min-height: 24px; padding: 2px 4px; font-size: 9px; }
 			.stats { flex-wrap: wrap; }
 			.stat { min-width: 0; flex: 1; padding: 14px 15px; }
 			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
@@ -551,8 +556,8 @@
 						<p id="active-kind"></p>
 					</div>
 					<div class="map-actions">
-						<a class="map-action open-map" id="open-map" href="#" target="_blank" rel="noreferrer" hidden>OPEN MAP ↗</a>
-						<button class="map-action" id="share-route" type="button" aria-label="Copy link to selected route" hidden>SHARE LINK</button>
+						<button class="map-action" id="share-route" type="button" aria-label="Share selected route" hidden>SHARE</button>
+						<a class="map-action open-map" id="open-map" href="#" target="_blank" rel="noreferrer" hidden>OPEN MAP <svg class="open-map-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
 					</div>
 				</div>
 				<div class="map-frame is-empty" id="map-frame">
