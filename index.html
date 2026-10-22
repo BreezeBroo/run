@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#f4f4f4">
-	<title>Waymark — route library</title>
+	<title>Waykeep — route library</title>
 	<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -217,7 +217,7 @@
 		.brand-mark { display: block; width: 27px; height: 27px; flex: none; border-radius: 7px; background: #000; transition: transform .35s cubic-bezier(.2,.75,.25,1), box-shadow .35s ease; }
 		.brand:hover .brand-mark { transform: rotate(-8deg) scale(1.08); box-shadow: 0 4px 14px #0004; }
 		.brand img.brand-mark { display: none; }
-		.brand-name { font: 600 19px/1 var(--serif); letter-spacing: -.035em; }
+		.brand-name { font: 700 19px/1 var(--sans); letter-spacing: .015em; }
 		.topbar-actions { display: flex; align-items: center; gap: 22px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
 		.top-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); animation: note-pulse 2.8s ease-in-out infinite; }
@@ -267,6 +267,7 @@
 		.distance-slider input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
 		.distance-slider input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 5px var(--coral); }
 		#distance-min { z-index: 2; }
+		.distance-slider[data-active-handle="max"] #distance-max { z-index: 2; }
 		.route-item {
 			position: relative;
 			width: 100%;
@@ -458,14 +459,14 @@
 </head>
 <body>
 	<header class="topbar">
-		<a class="brand" href="#" aria-label="Waymark home" style="color:inherit;text-decoration:none">
+		<a class="brand" href="#" aria-label="Waykeep home" style="color:inherit;text-decoration:none">
 			<img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23000000'/%3E%3Cpath d='M10 29 29 10l-5 15-14 4Z' fill='%23d4f06b'/%3Cpath d='m19 21 10-11-4 15-6-4Z' fill='%23ff8069'/%3E%3C/svg%3E" alt="" aria-hidden="true">
 			<svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
 				<rect width="40" height="40" rx="11" fill="#000000"></rect>
 				<path d="M10 29 29 10l-5 15-14 4Z" fill="#d4f06b"></path>
 				<path d="m19 21 10-11-4 15-6-4Z" fill="#ff8069"></path>
 			</svg>
-			<span class="brand-name">waymark</span>
+			<span class="brand-name">waykeep</span>
 		</a>
 		<div class="topbar-actions">
 			<span class="top-note">Your route library</span>
@@ -576,7 +577,7 @@
 	</dialog>
 	<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
 		<div class="dialog-head">
-			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waymark looks on this device.</p></div>
+			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waykeep looks on this device.</p></div>
 			<button class="close-dialog" id="close-settings" type="button" aria-label="Close appearance settings">×</button>
 		</div>
 		<div class="theme-options" role="radiogroup" aria-label="Color theme">
@@ -609,8 +610,10 @@
 			kind: "Walk",
 			type: "Loop"
 		};
-		const storageKey = "waymark-routes-v1";
-		const themeStorageKey = "waymark-theme-v1";
+		const storageKey = "waykeep-routes-v1";
+		const legacyStorageKey = "waymark-routes-v1";
+		const themeStorageKey = "waykeep-theme-v1";
+		const legacyThemeStorageKey = "waymark-theme-v1";
 		const routeList = document.getElementById("route-list");
 		const routeTabs = document.getElementById("route-tabs");
 		const savedRoutesTab = document.getElementById("saved-routes-tab");
@@ -626,11 +629,11 @@
 		const renameDialog = document.getElementById("rename-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
 		const themeNames = ["forest", "light", "dark", "system"];
+		let toastTimer;
 		let routes = loadRoutes();
 		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
 		let routeToRenameId = null;
 		let activeCategory = "mine";
-		let toastTimer;
 
 		function applyTheme(theme) {
 			document.documentElement.dataset.theme = theme;
@@ -641,7 +644,15 @@
 
 		function loadTheme() {
 			try {
-				const savedTheme = localStorage.getItem(themeStorageKey);
+				const currentValue = localStorage.getItem(themeStorageKey);
+				const savedTheme = currentValue ?? localStorage.getItem(legacyThemeStorageKey);
+				if (currentValue === null && themeNames.includes(savedTheme)) {
+					try {
+						localStorage.setItem(themeStorageKey, savedTheme);
+					} catch (error) {
+						showToast("Could not migrate saved appearance settings.");
+					}
+				}
 				return themeNames.includes(savedTheme) ? savedTheme : "light";
 			} catch (error) {
 				showToast("Could not load saved appearance settings.");
@@ -735,8 +746,10 @@
 
 		function loadRoutes() {
 			try {
-				const saved = JSON.parse(localStorage.getItem(storageKey));
-				if (Array.isArray(saved)) return [
+				const currentValue = localStorage.getItem(storageKey);
+				const saved = JSON.parse(currentValue ?? localStorage.getItem(legacyStorageKey));
+				if (Array.isArray(saved)) {
+					const loadedRoutes = [
 					starterRoute,
 					...saved.filter((route) =>
 						route && route.id !== starterRoute.id && isOnTheGoMapUrl(route.url)
@@ -744,7 +757,16 @@
 						...route,
 						type: getRouteType(route.url)
 					}))
-				];
+					];
+					if (currentValue === null) {
+						try {
+							localStorage.setItem(storageKey, JSON.stringify(loadedRoutes.filter((route) => route.id !== starterRoute.id)));
+						} catch (error) {
+							showToast("Could not migrate saved routes in this browser.");
+						}
+					}
+					return loadedRoutes;
+				}
 			} catch (error) {
 				return [starterRoute];
 			}
@@ -961,8 +983,12 @@
 			renderRoutes(nextIndex > previousIndex ? "category-forward" : "category-back");
 		});
 		function updateDistanceFilter(changedInput) {
-			distanceMin.max = distanceMax.value;
-			distanceMax.min = distanceMin.value;
+			if (changedInput === distanceMin && Number(distanceMin.value) > Number(distanceMax.value)) {
+				distanceMin.value = distanceMax.value;
+			}
+			if (changedInput === distanceMax && Number(distanceMax.value) < Number(distanceMin.value)) {
+				distanceMax.value = distanceMin.value;
+			}
 			const minimum = Number(distanceMin.value);
 			const maximum = Number(distanceMax.value);
 			document.getElementById("distance-min-value").value = `${minimum.toFixed(1).replace(/\.0$/, "")} km`;
@@ -971,6 +997,15 @@
 			distanceSlider.style.setProperty("--range-end", `${maximum / 50 * 100}%`);
 			if (changedInput) renderRoutes();
 		}
+		distanceSlider.addEventListener("pointerdown", (event) => {
+			const handle = event.target.closest("input[type='range']");
+			if (handle) distanceSlider.dataset.activeHandle = handle.id === "distance-max" ? "max" : "min";
+		});
+		distanceSlider.addEventListener("focusin", (event) => {
+			if (event.target === distanceMin || event.target === distanceMax) {
+				distanceSlider.dataset.activeHandle = event.target.id === "distance-max" ? "max" : "min";
+			}
+		});
 		distanceMin.addEventListener("input", () => updateDistanceFilter(distanceMin));
 		distanceMax.addEventListener("input", () => updateDistanceFilter(distanceMax));
 
