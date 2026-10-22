@@ -304,7 +304,7 @@
 		.route-action:hover { color: var(--ink); background: var(--hover); transform: translateY(-2px); }
 		.route-action.remove-route:hover { color: var(--danger); }
 		.route-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; }
-		.add-route {
+		.add-route, .random-select {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -320,8 +320,10 @@
 			cursor: pointer;
 			transition: border-color .2s ease, background .2s ease, transform .25s cubic-bezier(.2,.75,.25,1), box-shadow .2s ease;
 		}
-		.add-route[hidden] { display: none; }
-		.add-route:hover { border-color: var(--route-distance); background: var(--hover); transform: translateY(-2px); box-shadow: 0 6px 16px #0000000c; }
+		.add-route[hidden], .random-select[hidden] { display: none; }
+		.add-route:hover, .random-select:hover:not(:disabled) { border-color: var(--route-distance); background: var(--hover); transform: translateY(-2px); box-shadow: 0 6px 16px #0000000c; }
+		.random-select:disabled { color: var(--quiet-text); cursor: not-allowed; opacity: .65; }
+		.random-select { margin: 0 16px 20px; }
 		.plus { display: inline-block; font-size: 20px; font-weight: 400; line-height: 1; transition: transform .3s cubic-bezier(.2,.75,.25,1); }
 		.add-route:hover .plus { transform: rotate(90deg); }
 		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px/1.6 var(--mono); letter-spacing: .035em; }
@@ -337,7 +339,19 @@
 		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
+		.map-loading { display: none; position: absolute; inset: 0; z-index: 1; overflow: hidden; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); }
+		.map-frame.is-loading .map-loading { display: grid; }
+		.map-loading-content { display: grid; justify-items: center; gap: 15px; color: var(--ink); text-align: center; }
+		.map-loader { width: 76px; height: 76px; overflow: visible; filter: drop-shadow(0 5px 8px color-mix(in srgb, var(--ink) 18%, transparent)); }
+		.map-loader-path { fill: none; stroke: var(--coral); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 12 11; animation: route-draw 1.8s ease-in-out infinite; }
+		.map-loader-pin { fill: var(--coral); transform-box: fill-box; transform-origin: center; animation: pin-bob 1.8s ease-in-out infinite; }
+		.map-loader-pin-center { fill: var(--white); }
+		.map-loading-label { font: 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+		.map-loading-dots { display: inline-block; width: 1.2em; text-align: left; animation: loading-dots 1.2s steps(4, end) infinite; }
 		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); text-align: center; }
+		@keyframes route-draw { 0% { stroke-dashoffset: 46; opacity: .45; } 50% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .45; } }
+		@keyframes pin-bob { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-3px); } }
+		@keyframes loading-dots { 0% { width: 0; } 100% { width: 1.2em; } }
 		.empty-inner { max-width: 280px; }
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
 		.empty-inner span { color: var(--empty-copy); font-size: 13px; line-height: 1.6; }
@@ -507,6 +521,7 @@
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
 				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
+				<button class="random-select" id="random-select" type="button">Random select</button>
 				<div class="side-foot">YOUR COLLECTION<br>KEPT ON THIS DEVICE</div>
 			</aside>
 
@@ -520,8 +535,18 @@
 						<a class="map-action open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
 					</div>
 				</div>
-				<div class="map-frame" id="map-frame">
+				<div class="map-frame is-loading" id="map-frame">
 					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
+					<div class="map-loading" role="status" aria-live="polite">
+						<div class="map-loading-content">
+							<svg class="map-loader" viewBox="0 0 76 76" fill="none" aria-hidden="true">
+								<path class="map-loader-path" d="M12 54 25 43l10 5 15-21 14 8"></path>
+								<path class="map-loader-pin" d="M51 27c0 8-9 17-9 17s-9-9-9-17a9 9 0 1 1 18 0Z"></path>
+								<circle class="map-loader-pin-center" cx="42" cy="27" r="3"></circle>
+							</svg>
+							<span class="map-loading-label">Finding your route<span class="map-loading-dots" aria-hidden="true">...</span></span>
+						</div>
+					</div>
 					<div class="map-empty" id="map-empty">
 						<div class="empty-inner"><strong>Map unavailable.</strong><span>This map can’t be displayed here. Open it to view it on its original site.</span></div>
 					</div>
@@ -622,9 +647,18 @@
 		const distanceMin = document.getElementById("distance-min");
 		const distanceMax = document.getElementById("distance-max");
 		const addRouteButton = document.getElementById("add-route");
+		const randomSelectButton = document.getElementById("random-select");
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
+		mapFrame.addEventListener("load", () => {
+			mapFrame.parentElement.classList.remove("is-loading");
+			mapEmpty.style.display = "none";
+		});
+		mapFrame.addEventListener("error", () => {
+			mapFrame.parentElement.classList.remove("is-loading");
+			mapEmpty.style.display = "grid";
+		});
 		const routeDialog = document.getElementById("route-dialog");
 		const renameDialog = document.getElementById("rename-dialog");
 		const settingsDialog = document.getElementById("settings-dialog");
@@ -781,19 +815,24 @@
 			}
 		}
 
+		function getFilteredMyRoutes() {
+			const minimumDistance = Number(distanceMin.value);
+			const maximumDistance = Number(distanceMax.value);
+			return routes.filter((route) => {
+				const distance = Number(route.distance);
+				return route.id !== starterRoute.id &&
+					Number.isFinite(distance) &&
+					distance >= minimumDistance &&
+					distance <= maximumDistance;
+			});
+		}
+
 		function renderRoutes(animationDirection = "") {
 			routeList.replaceChildren();
 			routeList.classList.remove("category-forward", "category-back");
-			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
 			const publicRoutes = [];
-			const minimumDistance = Number(distanceMin.value);
-			const maximumDistance = Number(distanceMax.value);
-			const matchesDistance = (route) => {
-				const distance = Number(route.distance);
-				return Number.isFinite(distance) && distance >= minimumDistance && distance <= maximumDistance;
-			};
-			const filteredMyRoutes = myRoutes.filter(matchesDistance);
-			const filteredPublicRoutes = publicRoutes.filter(matchesDistance);
+			const filteredMyRoutes = getFilteredMyRoutes();
+			const filteredPublicRoutes = publicRoutes;
 			document.getElementById("route-count").textContent = `(${filteredMyRoutes.length})`;
 			document.getElementById("public-route-count").textContent = `(${filteredPublicRoutes.length})`;
 			if (activeCategory === "public") {
@@ -813,6 +852,8 @@
 				tab.setAttribute("aria-pressed", String(tab.dataset.category === activeCategory));
 			});
 			addRouteButton.hidden = activeCategory !== "mine";
+			randomSelectButton.hidden = activeCategory !== "mine";
+			randomSelectButton.disabled = filteredMyRoutes.length === 0;
 		}
 
 		function renderRouteList(categoryRoutes, list) {
@@ -967,11 +1008,10 @@
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
+			mapFrame.parentElement.classList.add("is-loading");
+			mapEmpty.style.display = "none";
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
-			mapEmpty.style.display = "none";
-			mapFrame.onload = () => { mapEmpty.style.display = "none"; };
-			mapFrame.onerror = () => { mapEmpty.style.display = "grid"; };
 		}
 
 		routeTabs.addEventListener("click", (event) => {
@@ -981,6 +1021,12 @@
 			const nextIndex = tab.dataset.category === "mine" ? 0 : 1;
 			activeCategory = tab.dataset.category;
 			renderRoutes(nextIndex > previousIndex ? "category-forward" : "category-back");
+		});
+		randomSelectButton.addEventListener("click", () => {
+			const candidates = getFilteredMyRoutes();
+			if (candidates.length === 0) return;
+			const route = candidates[Math.floor(Math.random() * candidates.length)];
+			selectRoute(route.id);
 		});
 		function updateDistanceFilter(changedInput) {
 			if (changedInput === distanceMin && Number(distanceMin.value) > Number(distanceMax.value)) {
