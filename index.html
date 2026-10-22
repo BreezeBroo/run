@@ -280,11 +280,14 @@
 		}
 		.route-entry { position: relative; cursor: grab; }
 		.route-entry:active { cursor: grabbing; }
+		.route-entry[draggable="true"] .route-item { cursor: grab; }
+		.route-entry[draggable="true"] .route-item:active { cursor: grabbing; }
 		.route-entry, .route-entry * { user-select: none; }
 		.route-entry.dragging { opacity: .45; }
+		.route-entry.dragging .route-item { background: var(--active); box-shadow: 0 10px 28px #00000018; transform: scale(.985); }
 		.route-entry.drag-over:not(.drag-over-after) { border-radius: 10px; box-shadow: inset 0 2px 0 var(--coral); }
 		.route-entry.drag-over-after { border-radius: 10px; box-shadow: inset 0 -2px 0 var(--coral); }
-		.route-entry.has-actions .route-sub { padding-right: 100px; }
+		.route-entry.has-actions .route-sub { padding-right: 78px; }
 		.route-item:hover { background: var(--hover); transform: translateX(3px); }
 		.route-item.active { border-color: var(--active-border); background: var(--active); }
 		.route-item.active::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; background: var(--coral); border-radius: 0 3px 3px 0; }
@@ -299,9 +302,6 @@
 		.route-entry:hover .route-action, .route-entry:focus-within .route-action { opacity: 1; transform: translateY(0); }
 		.route-action:hover { color: var(--ink); background: var(--hover); transform: translateY(-2px); }
 		.route-action.remove-route:hover { color: var(--danger); }
-		.route-action.route-drag-handle { display: grid; min-width: 22px; min-height: 20px; place-items: center; padding: 2px; cursor: grab; touch-action: none; }
-		.route-action.route-drag-handle:active { cursor: grabbing; }
-		.route-drag-handle svg { width: 14px; height: 14px; }
 		.route-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; }
 		.add-route {
 			display: flex;
@@ -804,41 +804,12 @@
 				item.className = `route-item${route.id === selectedId ? " active" : ""}`;
 				item.setAttribute("aria-pressed", String(route.id === selectedId));
 				item.setAttribute("aria-label", `${route.name}${route.distance ? `, ${Number(route.distance).toFixed(2)} kilometers` : ""}`);
-
-				const top = document.createElement("span");
-				top.className = "route-top";
-				const name = document.createElement("span");
-				name.className = "route-name";
-				name.textContent = route.name;
-				const distance = document.createElement("span");
-				distance.className = "route-distance";
-				distance.textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
-				top.append(name, distance);
-
-				const sub = document.createElement("span");
-				sub.className = "route-sub";
-				const dot = document.createElement("span");
-				dot.className = "route-dot";
-				dot.setAttribute("aria-hidden", "true");
-				const routeNumber = route.id === starterRoute.id
-					? 1
-					: routes.filter((entry) => entry.id !== starterRoute.id).findIndex((entry) => entry.id === route.id) + 1;
-				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(routeNumber).padStart(2, "0")}`));
-				item.append(top, sub);
-				entry.append(item);
-
 				if (route.id !== starterRoute.id) {
-					const actions = document.createElement("div");
-					actions.className = "route-actions";
-					const dragHandle = document.createElement("button");
-					dragHandle.type = "button";
-					dragHandle.className = "route-action route-drag-handle";
-					dragHandle.setAttribute("aria-label", `Reorder ${route.name}. Use the up and down arrow keys to change its position.`);
-					dragHandle.title = "Use the up and down arrow keys to reorder";
-					dragHandle.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="4" r="1"/><circle cx="11" cy="4" r="1"/><circle cx="5" cy="8" r="1"/><circle cx="11" cy="8" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="11" cy="12" r="1"/></svg>';
 					entry.draggable = true;
-					dragHandle.addEventListener("keydown", (event) => {
-						if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+					item.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
+					item.title = "Drag this route to reorder. Press Alt+Up or Alt+Down to move it.";
+					item.addEventListener("keydown", (event) => {
+						if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
 						event.preventDefault();
 						const savedRoutes = routes.filter((entry) => entry.id !== starterRoute.id);
 						const currentIndex = savedRoutes.findIndex((entry) => entry.id === route.id);
@@ -848,7 +819,7 @@
 					});
 					entry.addEventListener("dragstart", (event) => {
 						const sourceControl = event.target.closest("button");
-						if (sourceControl && !sourceControl.classList.contains("route-item") && !sourceControl.classList.contains("route-drag-handle")) {
+						if (sourceControl && !sourceControl.classList.contains("route-item")) {
 							event.preventDefault();
 							return;
 						}
@@ -878,8 +849,33 @@
 						const bounds = entry.getBoundingClientRect();
 						reorderRoute(sourceId, route.id, event.clientY > bounds.top + bounds.height / 2);
 					});
-					actions.append(dragHandle);
+				}
 
+				const top = document.createElement("span");
+				top.className = "route-top";
+				const name = document.createElement("span");
+				name.className = "route-name";
+				name.textContent = route.name;
+				const distance = document.createElement("span");
+				distance.className = "route-distance";
+				distance.textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
+				top.append(name, distance);
+
+				const sub = document.createElement("span");
+				sub.className = "route-sub";
+				const dot = document.createElement("span");
+				dot.className = "route-dot";
+				dot.setAttribute("aria-hidden", "true");
+				const routeNumber = route.id === starterRoute.id
+					? 1
+					: routes.filter((entry) => entry.id !== starterRoute.id).findIndex((entry) => entry.id === route.id) + 1;
+				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(routeNumber).padStart(2, "0")}`));
+				item.append(top, sub);
+				entry.append(item);
+
+				if (route.id !== starterRoute.id) {
+					const actions = document.createElement("div");
+					actions.className = "route-actions";
 					const rename = document.createElement("button");
 					rename.type = "button";
 					rename.className = "route-action rename-route";
@@ -935,9 +931,7 @@
 				document.getElementById("active-kind").textContent = `${(selectedRoute.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			}
 			if (restoreFocus) {
-				Array.from(routeList.querySelectorAll(".route-drag-handle"))
-					.find((handle) => handle.closest(".route-entry")?.dataset.routeId === sourceId)
-					?.focus();
+				routeList.querySelector(`.route-entry[data-route-id="${CSS.escape(sourceId)}"] .route-item`)?.focus();
 			}
 		}
 
