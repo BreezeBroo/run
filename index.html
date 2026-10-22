@@ -279,6 +279,9 @@
 			transition: background .22s ease, border-color .22s ease, transform .24s cubic-bezier(.2,.75,.25,1), box-shadow .22s ease;
 		}
 		.route-entry { position: relative; }
+		.route-entry.dragging { opacity: .45; }
+		.route-entry.drag-over:not(.drag-over-after) { border-radius: 10px; box-shadow: inset 0 2px 0 var(--coral); }
+		.route-entry.drag-over-after { border-radius: 10px; box-shadow: inset 0 -2px 0 var(--coral); }
 		.route-entry.has-actions .route-sub { padding-right: 100px; }
 		.route-item:hover { background: var(--hover); transform: translateX(3px); }
 		.route-item.active { border-color: var(--active-border); background: var(--active); }
@@ -294,6 +297,9 @@
 		.route-entry:hover .route-action, .route-entry:focus-within .route-action { opacity: 1; transform: translateY(0); }
 		.route-action:hover { color: var(--ink); background: var(--hover); transform: translateY(-2px); }
 		.route-action.remove-route:hover { color: var(--danger); }
+		.route-action.route-drag-handle { display: grid; min-width: 22px; min-height: 20px; place-items: center; padding: 2px; cursor: grab; touch-action: none; }
+		.route-action.route-drag-handle:active { cursor: grabbing; }
+		.route-drag-handle svg { width: 14px; height: 14px; }
 		.route-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; }
 		.add-route {
 			display: flex;
@@ -756,8 +762,16 @@
 			routeList.classList.remove("category-forward", "category-back");
 			const myRoutes = routes.filter((route) => route.id !== starterRoute.id);
 			const publicRoutes = [];
-			document.getElementById("route-count").textContent = `(${myRoutes.length})`;
-			document.getElementById("public-route-count").textContent = `(${publicRoutes.length})`;
+			const minimumDistance = Number(distanceMin.value);
+			const maximumDistance = Number(distanceMax.value);
+			const matchesDistance = (route) => {
+				const distance = Number(route.distance);
+				return Number.isFinite(distance) && distance >= minimumDistance && distance <= maximumDistance;
+			};
+			const filteredMyRoutes = myRoutes.filter(matchesDistance);
+			const filteredPublicRoutes = publicRoutes.filter(matchesDistance);
+			document.getElementById("route-count").textContent = `(${filteredMyRoutes.length})`;
+			document.getElementById("public-route-count").textContent = `(${filteredPublicRoutes.length})`;
 			if (activeCategory === "public") {
 				const comingSoon = document.createElement("p");
 				comingSoon.className = "route-empty";
@@ -765,13 +779,7 @@
 				comingSoon.setAttribute("role", "status");
 				routeList.append(comingSoon);
 			}
-			const activeRoutes = activeCategory === "mine" ? myRoutes : publicRoutes;
-			const minimumDistance = Number(distanceMin.value);
-			const maximumDistance = Number(distanceMax.value);
-			const categoryRoutes = activeRoutes.filter((route) => {
-				const distance = Number(route.distance);
-				return Number.isFinite(distance) && distance >= minimumDistance && distance <= maximumDistance;
-			});
+			const categoryRoutes = activeCategory === "mine" ? filteredMyRoutes : filteredPublicRoutes;
 			renderRouteList(categoryRoutes, routeList);
 			routeTabs.dataset.activeCategory = activeCategory;
 			if (animationDirection) {
@@ -784,10 +792,11 @@
 		}
 
 		function renderRouteList(categoryRoutes, list) {
-			categoryRoutes.forEach((route, index) => {
+			categoryRoutes.forEach((route) => {
 				const entry = document.createElement("div");
 				entry.className = `route-entry${route.id !== starterRoute.id ? " has-actions" : ""}`;
 				entry.setAttribute("role", "listitem");
+				entry.dataset.routeId = route.id;
 				const item = document.createElement("button");
 				item.type = "button";
 				item.className = `route-item${route.id === selectedId ? " active" : ""}`;
@@ -809,13 +818,62 @@
 				const dot = document.createElement("span");
 				dot.className = "route-dot";
 				dot.setAttribute("aria-hidden", "true");
-				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(index + 1).padStart(2, "0")}`));
+				const routeNumber = route.id === starterRoute.id
+					? 1
+					: routes.filter((entry) => entry.id !== starterRoute.id).findIndex((entry) => entry.id === route.id) + 1;
+				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(routeNumber).padStart(2, "0")}`));
 				item.append(top, sub);
 				entry.append(item);
 
 				if (route.id !== starterRoute.id) {
 					const actions = document.createElement("div");
 					actions.className = "route-actions";
+					const dragHandle = document.createElement("button");
+					dragHandle.type = "button";
+					dragHandle.className = "route-action route-drag-handle";
+					dragHandle.draggable = true;
+					dragHandle.setAttribute("aria-label", `Reorder ${route.name}. Use the up and down arrow keys to change its position.`);
+					dragHandle.title = "Drag to reorder, or use the up and down arrow keys";
+					dragHandle.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="4" r="1"/><circle cx="11" cy="4" r="1"/><circle cx="5" cy="8" r="1"/><circle cx="11" cy="8" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="11" cy="12" r="1"/></svg>';
+					dragHandle.addEventListener("keydown", (event) => {
+						if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+						event.preventDefault();
+						const savedRoutes = routes.filter((entry) => entry.id !== starterRoute.id);
+						const currentIndex = savedRoutes.findIndex((entry) => entry.id === route.id);
+						const targetIndex = currentIndex + (event.key === "ArrowUp" ? -1 : 1);
+						if (targetIndex < 0 || targetIndex >= savedRoutes.length) return;
+						reorderRoute(route.id, savedRoutes[targetIndex].id, event.key === "ArrowDown", true);
+					});
+					dragHandle.addEventListener("dragstart", (event) => {
+						event.stopPropagation();
+						event.dataTransfer.effectAllowed = "move";
+						event.dataTransfer.setData("text/plain", route.id);
+						entry.classList.add("dragging");
+					});
+					dragHandle.addEventListener("dragend", () => {
+						entry.classList.remove("dragging");
+						routeList.querySelectorAll(".route-entry.drag-over").forEach((target) => target.classList.remove("drag-over", "drag-over-after"));
+					});
+					entry.addEventListener("dragover", (event) => {
+						if (!routeList.querySelector(".route-entry.dragging")) return;
+						event.preventDefault();
+						event.dataTransfer.dropEffect = "move";
+						entry.classList.add("drag-over");
+						const bounds = entry.getBoundingClientRect();
+						entry.classList.toggle("drag-over-after", event.clientY > bounds.top + bounds.height / 2);
+					});
+					entry.addEventListener("dragleave", (event) => {
+						if (!entry.contains(event.relatedTarget)) entry.classList.remove("drag-over", "drag-over-after");
+					});
+					entry.addEventListener("drop", (event) => {
+						event.preventDefault();
+						entry.classList.remove("drag-over", "drag-over-after");
+						const sourceId = event.dataTransfer.getData("text/plain");
+						const bounds = entry.getBoundingClientRect();
+						reorderRoute(sourceId, route.id, event.clientY > bounds.top + bounds.height / 2);
+					});
+					actions.append(dragHandle);
+
 					const rename = document.createElement("button");
 					rename.type = "button";
 					rename.className = "route-action rename-route";
@@ -847,6 +905,34 @@
 				item.addEventListener("click", () => selectRoute(route.id));
 				list.append(entry);
 			});
+		}
+
+		function reorderRoute(sourceId, targetId, placeAfter, restoreFocus = false) {
+			if (!sourceId || !targetId || sourceId === targetId) return;
+			const savedRoutes = routes.filter((route) => route.id !== starterRoute.id);
+			const sourceIndex = savedRoutes.findIndex((route) => route.id === sourceId);
+			const targetIndex = savedRoutes.findIndex((route) => route.id === targetId);
+			if (sourceIndex < 0 || targetIndex < 0) return;
+
+			const [movedRoute] = savedRoutes.splice(sourceIndex, 1);
+			const insertionIndex = savedRoutes.findIndex((route) => route.id === targetId) + (placeAfter ? 1 : 0);
+			savedRoutes.splice(insertionIndex, 0, movedRoute);
+			routes = [starterRoute, ...savedRoutes];
+			persistRoutes();
+			renderRoutes();
+
+			const selectedRoute = routes.find((route) => route.id === selectedId);
+			if (selectedRoute) {
+				const routeIndex = selectedRoute.id === starterRoute.id
+					? 0
+					: savedRoutes.findIndex((route) => route.id === selectedRoute.id);
+				document.getElementById("active-kind").textContent = `${(selectedRoute.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
+			}
+			if (restoreFocus) {
+				Array.from(routeList.querySelectorAll(".route-drag-handle"))
+					.find((handle) => handle.closest(".route-entry")?.dataset.routeId === sourceId)
+					?.focus();
+			}
 		}
 
 		function selectRoute(id) {
