@@ -278,7 +278,9 @@
 			cursor: pointer;
 			transition: background .22s ease, border-color .22s ease, transform .24s cubic-bezier(.2,.75,.25,1), box-shadow .22s ease;
 		}
-		.route-entry { position: relative; }
+		.route-entry { position: relative; cursor: grab; }
+		.route-entry:active { cursor: grabbing; }
+		.route-entry, .route-entry * { user-select: none; }
 		.route-entry.dragging { opacity: .45; }
 		.route-entry.drag-over:not(.drag-over-after) { border-radius: 10px; box-shadow: inset 0 2px 0 var(--coral); }
 		.route-entry.drag-over-after { border-radius: 10px; box-shadow: inset 0 -2px 0 var(--coral); }
@@ -831,10 +833,10 @@
 					const dragHandle = document.createElement("button");
 					dragHandle.type = "button";
 					dragHandle.className = "route-action route-drag-handle";
-					dragHandle.draggable = true;
 					dragHandle.setAttribute("aria-label", `Reorder ${route.name}. Use the up and down arrow keys to change its position.`);
-					dragHandle.title = "Drag to reorder, or use the up and down arrow keys";
+					dragHandle.title = "Use the up and down arrow keys to reorder";
 					dragHandle.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="4" r="1"/><circle cx="11" cy="4" r="1"/><circle cx="5" cy="8" r="1"/><circle cx="11" cy="8" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="11" cy="12" r="1"/></svg>';
+					entry.draggable = true;
 					dragHandle.addEventListener("keydown", (event) => {
 						if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
 						event.preventDefault();
@@ -844,13 +846,17 @@
 						if (targetIndex < 0 || targetIndex >= savedRoutes.length) return;
 						reorderRoute(route.id, savedRoutes[targetIndex].id, event.key === "ArrowDown", true);
 					});
-					dragHandle.addEventListener("dragstart", (event) => {
-						event.stopPropagation();
+					entry.addEventListener("dragstart", (event) => {
+						const sourceControl = event.target.closest("button");
+						if (sourceControl && !sourceControl.classList.contains("route-item") && !sourceControl.classList.contains("route-drag-handle")) {
+							event.preventDefault();
+							return;
+						}
 						event.dataTransfer.effectAllowed = "move";
 						event.dataTransfer.setData("text/plain", route.id);
 						entry.classList.add("dragging");
 					});
-					dragHandle.addEventListener("dragend", () => {
+					entry.addEventListener("dragend", () => {
 						entry.classList.remove("dragging");
 						routeList.querySelectorAll(".route-entry.drag-over").forEach((target) => target.classList.remove("drag-over", "drag-over-after"));
 					});
