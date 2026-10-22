@@ -537,13 +537,6 @@
 				<input id="route-name-input" name="name" placeholder="e.g. Hilltop trail" maxlength="60" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
 			</div>
 			<div class="field">
-				<label for="route-type-input">Route type</label>
-				<select id="route-type-input" name="type" required>
-					<option value="Route" selected>Route</option>
-					<option value="Loop">Loop</option>
-				</select>
-			</div>
-			<div class="field">
 				<label for="route-url-input">Map URL or iframe</label>
 				<textarea id="route-url-input" name="url" placeholder="Paste an On The Go Map URL or iframe embed" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required></textarea>
 				<span class="field-hint">Only On The Go Map links are supported. Your routes stay saved on this device.</span>
@@ -671,6 +664,67 @@
 			}
 		}
 
+		function decodeRouteShape(value, customAlphabet) {
+			const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_~-";
+			const encoded = customAlphabet && value.startsWith(".") ? value.slice(1) : value;
+			let latitude = 0;
+			let longitude = 0;
+			let index = 0;
+			const points = [];
+			try {
+				while (index < encoded.length) {
+					const deltas = [];
+					for (let coordinate = 0; coordinate < 2; coordinate += 1) {
+						let result = 0;
+						let shift = 0;
+						let chunk;
+						do {
+							if (index >= encoded.length || shift > 30) return null;
+							const character = encoded[index++];
+							const digit = customAlphabet ? alphabet.indexOf(character) : character.charCodeAt(0) - 63;
+							if (digit < 0 || digit > 63) return null;
+							chunk = digit;
+							result |= (chunk & 31) << shift;
+							shift += 5;
+						} while (chunk >= 32);
+						deltas.push(result & 1 ? ~(result >> 1) : result >> 1);
+					}
+					latitude += deltas[0];
+					longitude += deltas[1];
+					if (!Number.isSafeInteger(latitude) || !Number.isSafeInteger(longitude)) return null;
+					points.push([longitude / 1e5, latitude / 1e5]);
+				}
+			} catch {
+				return null;
+			}
+			return points.length >= 2 ? points : null;
+		}
+
+		function getRouteType(value) {
+			try {
+				const url = new URL(value);
+				const customShape = url.searchParams.get("r2");
+				const shape = customShape
+					? decodeRouteShape(customShape, true)
+					: url.searchParams.get("r")
+						? decodeRouteShape(url.searchParams.get("r"), false)
+						: null;
+				if (!shape) return "Route";
+				const [startLongitude, startLatitude] = shape[0];
+				const [endLongitude, endLatitude] = shape[shape.length - 1];
+				const radians = (degrees) => degrees * Math.PI / 180;
+				const latitudeDelta = radians(endLatitude - startLatitude);
+				const longitudeDelta = radians(endLongitude - startLongitude);
+				const haversine = Math.sin(latitudeDelta / 2) ** 2 +
+					Math.cos(radians(startLatitude)) * Math.cos(radians(endLatitude)) *
+					Math.sin(longitudeDelta / 2) ** 2;
+				const distance = 6371008.8 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+				return distance <= 30 ? "Loop" : "Route";
+			} catch {
+				return "Route";
+			}
+		}
+
 		function loadRoutes() {
 			try {
 				const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -680,7 +734,7 @@
 						route && route.id !== starterRoute.id && isOnTheGoMapUrl(route.url)
 					).map((route) => ({
 						...route,
-						type: route.type === "Loop" ? "Loop" : "Route"
+						type: getRouteType(route.url)
 					}))
 				];
 			} catch (error) {
@@ -933,9 +987,8 @@
 					url,
 					distance: getRouteDistance(url),
 					kind: "Route",
-					type: form.elements.type.value
+					type: getRouteType(url)
 				};
-				if (!["Route", "Loop"].includes(route.type)) throw new Error("Choose whether this is a route or a loop.");
 				if (!route.name) throw new Error("Add a name for this route.");
 				routes.push(route);
 				persistRoutes();
