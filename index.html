@@ -323,10 +323,10 @@
 		.add-route[hidden], .random-select[hidden] { display: none; }
 		.add-route:hover, .random-select:hover:not(:disabled) { border-color: var(--route-distance); background: var(--hover); transform: translateY(-2px); box-shadow: 0 6px 16px #0000000c; }
 		.random-select:disabled { color: var(--quiet-text); cursor: not-allowed; opacity: .65; }
-		.random-select { margin: 0 16px 20px; }
 		.plus { display: inline-block; font-size: 20px; font-weight: 400; line-height: 1; transition: transform .3s cubic-bezier(.2,.75,.25,1); }
 		.add-route:hover .plus { transform: rotate(90deg); }
-		.side-foot { margin-top: auto; padding: 17px 20px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px/1.6 var(--mono); letter-spacing: .035em; }
+		.side-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding: 14px 15px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px/1.6 var(--mono); letter-spacing: .035em; }
+		.side-foot .random-select { flex: none; margin: 0; min-height: 34px; padding: 7px 9px; font-size: 10px; white-space: nowrap; }
 		.map-panel { min-width: 0; overflow: hidden; }
 		.map-heading { min-height: 75px; padding: 17px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
 		.map-actions { display: flex; flex: none; align-items: center; gap: 8px; }
@@ -440,7 +440,7 @@
 			.route-entry { flex: 0 0 205px; min-width: 0; }
 			.route-action { opacity: 1; }
 			.add-route { margin-top: 0; }
-			.side-foot { display: none; }
+			.side-foot { display: flex; }
 			.map-frame, .map-frame iframe { min-height: 360px; }
 		}
 		@media (max-width: 520px) {
@@ -521,8 +521,10 @@
 				</div>
 				<div class="route-list" id="route-list" role="list" aria-live="polite"></div>
 				<button class="add-route" id="add-route" type="button"><span class="plus" aria-hidden="true">+</span> Add a route</button>
-				<button class="random-select" id="random-select" type="button">Random select</button>
-				<div class="side-foot">YOUR COLLECTION<br>KEPT ON THIS DEVICE</div>
+				<div class="side-foot">
+					<span>YOUR COLLECTION<br>KEPT ON THIS DEVICE</span>
+					<button class="random-select" id="random-select" type="button">Random select</button>
+				</div>
 			</aside>
 
 			<section class="map-panel" aria-label="Selected route">
@@ -651,11 +653,16 @@
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
+		let mapLoadTimer;
 		mapFrame.addEventListener("load", () => {
-			mapFrame.parentElement.classList.remove("is-loading");
-			mapEmpty.style.display = "none";
+			clearTimeout(mapLoadTimer);
+			mapLoadTimer = setTimeout(() => {
+				mapFrame.parentElement.classList.remove("is-loading");
+				mapEmpty.style.display = "none";
+			}, 3000);
 		});
 		mapFrame.addEventListener("error", () => {
+			clearTimeout(mapLoadTimer);
 			mapFrame.parentElement.classList.remove("is-loading");
 			mapEmpty.style.display = "grid";
 		});
@@ -1008,6 +1015,7 @@
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
+			clearTimeout(mapLoadTimer);
 			mapFrame.parentElement.classList.add("is-loading");
 			mapEmpty.style.display = "none";
 			mapFrame.src = route.url;
