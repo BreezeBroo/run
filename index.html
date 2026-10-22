@@ -343,6 +343,7 @@
 		.map-title h2 { margin: 0 0 5px; overflow: hidden; font: 600 19px/1.15 var(--serif); letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
 		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
 		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; }
+		.open-map-arrow { width: 8px; height: 8px; flex: none; }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
 		.map-frame.is-empty iframe, .map-frame.is-empty .map-loading { display: none; }
@@ -456,6 +457,8 @@
 			.route-drag-handle svg { width: 17px; height: 17px; }
 			.route-actions { right: 9px; bottom: 11px; gap: 4px; }
 			.route-action { min-height: 26px; padding: 3px 5px; font-size: 10px; opacity: 1; }
+			.open-map-arrow { width: 12px; height: 12px; }
+			.map-action.open-map { display: inline-flex; align-items: center; gap: 4px; }
 			.add-route { margin-top: 0; }
 			.side-foot { display: flex; }
 			.map-frame, .map-frame iframe { min-height: 360px; }
@@ -476,8 +479,6 @@
 			.map-title h2 { font-size: 15px; }
 			.map-actions { gap: 6px; }
 			.map-action { padding: 8px 9px; font-size: 10px; }
-			.open-map-arrow { width: 12px; height: 12px; }
-			.map-action.open-map { display: inline-flex; align-items: center; gap: 4px; }
 			.map-frame { aspect-ratio: 1 / 1.04; min-height: 350px; }
 			.map-frame iframe { min-height: 350px; }
 			.route-actions { right: 8px; bottom: 10px; gap: 3px; }
