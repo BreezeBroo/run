@@ -304,6 +304,9 @@
 		.route-action:hover { color: var(--ink); background: var(--hover); transform: translateY(-2px); }
 		.route-action.remove-route:hover { color: var(--danger); }
 		.route-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; }
+		.no-routes-empty { display: grid; gap: 8px; font-weight: 400; }
+		.no-routes-empty strong { color: var(--ink); font-size: 14px; }
+		.no-routes-empty span { font-size: 12px; line-height: 1.6; }
 		.add-route, .random-select {
 			display: flex;
 			align-items: center;
@@ -331,6 +334,7 @@
 		.map-heading { min-height: 75px; padding: 17px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); }
 		.map-actions { display: flex; flex: none; align-items: center; gap: 8px; }
 		.map-action { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer; transition: background .2s ease, transform .2s cubic-bezier(.2,.75,.25,1), box-shadow .2s ease; }
+		.map-action[hidden] { display: none; }
 		.map-action:hover { background: var(--hover); transform: translateY(-2px); box-shadow: 0 5px 14px #0000000c; }
 		.map-action:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.map-title { min-width: 0; }
@@ -339,6 +343,11 @@
 		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
+		.map-frame.is-empty iframe, .map-frame.is-empty .map-loading { display: none; }
+		.no-route-selected { position: absolute; inset: 0; display: grid; place-items: center; padding: 28px; text-align: center; }
+		.no-route-selected[hidden] { display: none; }
+		.no-route-selected strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
+		.no-route-selected span { color: var(--empty-copy); font-size: 13px; line-height: 1.6; }
 		.map-loading { display: none; position: absolute; inset: 0; z-index: 1; overflow: hidden; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); }
 		.map-frame.is-loading .map-loading { display: grid; }
 		.map-loading-content { display: grid; justify-items: center; gap: 15px; color: var(--ink); text-align: center; }
@@ -356,6 +365,7 @@
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
 		.empty-inner span { color: var(--empty-copy); font-size: 13px; line-height: 1.6; }
 		.stats { display: flex; align-items: stretch; border-top: 1px solid var(--line); }
+		.stats[hidden] { display: none; }
 		.stat { min-width: 140px; padding: 17px 22px; animation: stat-enter .55s both; }
 		.stat:nth-child(1) { animation-delay: .24s; }
 		.stat:nth-child(2) { animation-delay: .34s; }
@@ -530,15 +540,19 @@
 			<section class="map-panel" aria-label="Selected route">
 				<div class="map-heading">
 					<div class="map-title">
-						<h2 id="active-name">Riverside Loop</h2>
-						<p id="active-kind">WALK · ROUTE 01</p>
+						<h2 id="active-name">No route selected</h2>
+						<p id="active-kind"></p>
 					</div>
 					<div class="map-actions">
-						<a class="map-action open-map" id="open-map" href="https://onthegomap.com/" target="_blank" rel="noreferrer">OPEN MAP ↗</a>
+						<a class="map-action open-map" id="open-map" href="#" target="_blank" rel="noreferrer" hidden>OPEN MAP ↗</a>
+						<button class="map-action" id="share-route" type="button" aria-label="Copy link to selected route" hidden>SHARE LINK</button>
 					</div>
 				</div>
-				<div class="map-frame is-loading" id="map-frame">
-					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://onthegomap.com/?m=r&amp;u=km&amp;w%5B%5D=Routes+may+not+be+suitable+for+public+use.&amp;c%5B%5D=Route+data+%C2%A92026+On+The+Go+Map%2C+OpenStreetMap+Contributors&amp;d=11260&amp;f=c3cc71ebcd&amp;n=1&amp;dm=1&amp;context=embed&amp;r2=sc~z8dskpDw1Ta1Hk3p2o2s4y3p4GHCBiBXB39J~1Z1t3Dz1Z1v5Bl2BX3Dv45f40x24X76d70D094X40D0H6X92v33h33z13l1Db3Lj4Fr31BDZ3X2bE1B1HHd47v19x37t40t34~38r36t1EZ3Gf3Sj4OZ3Mh2Ch1Ut2Kt1OZ2296Du2f8_1r5Sx2Mp2Cn1Y1t4w3tJy2jEe5zQIh3I~3Kh54X72t40H0L0rE2r82t72bO4da12X70l62nB2N076B4965i2h2o1x1695Au2m3g1q1Ns3LW1n1W2l1i2HKPSTi1Dq11o18i28k12I2s1Du19W32o4Ac1ESk1a28C_3u2W1Sc1m1EO2a17Uf1m1h1g1j1W1b1Y3Ng1b1g1NY15SFc22S6UKSu1UE3i2Pi1QAI5Kx1c2t1_2f2s2Ru1Fi15e20y10a2By33y3HA1u71s80sE0M0I1u43Y7Ji5HW4Hi3d5_Qx2kEv2oEVc5X1u4Bo1Lq2Ry2z1s5t2g85E1ANa2Ju1Tu2Bi1Li2Na3Rk4Fg3Da35u17s33W40u38u4Ay38w1Ie42I2CY2cEEa32CGs3Mk4Ec34m14_14i31w35Y90I0E3Y40A0E5e73Y70y26g4Ew4CY3Cm2a1w5E_1a1u3KW24A34dB_ABCFIx3q4n2r4j3q2Z1Id2a170"></iframe>
+				<div class="map-frame is-empty" id="map-frame">
+					<iframe id="route-map" title="Map of the selected route" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+					<div class="no-route-selected" id="no-route-selected">
+						<div><strong>No route selected</strong><span>Add a route to see its map here.</span></div>
+					</div>
 					<div class="map-loading" role="status" aria-live="polite">
 						<div class="map-loading-content">
 							<svg class="map-loader" viewBox="0 0 76 76" fill="none" aria-hidden="true">
@@ -553,9 +567,9 @@
 						<div class="empty-inner"><strong>Map unavailable.</strong><span>This map can’t be displayed here. Open it to view it on its original site.</span></div>
 					</div>
 				</div>
-				<div class="stats" aria-label="Route details">
-					<div class="stat"><span class="stat-label">Distance</span><span class="stat-value" id="active-distance">11.26 km</span></div>
-					<div class="stat"><span class="stat-label">Route type</span><span class="stat-value" id="active-type">Loop</span></div>
+				<div class="stats" id="route-stats" aria-label="Route details" hidden>
+					<div class="stat"><span class="stat-label">Distance</span><span class="stat-value" id="active-distance">Unavailable</span></div>
+					<div class="stat"><span class="stat-label">Route type</span><span class="stat-value" id="active-type">Route</span></div>
 					<div class="credit">Map data © OpenStreetMap contributors</div>
 				</div>
 			</section>
@@ -629,14 +643,6 @@
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 	<script>
-		const starterRoute = {
-			id: "starter-route",
-			name: "Riverside Loop",
-			url: document.getElementById("route-map").getAttribute("src"),
-			distance: 11.26,
-			kind: "Walk",
-			type: "Loop"
-		};
 		const storageKey = "waykeep-routes-v1";
 		const legacyStorageKey = "waymark-routes-v1";
 		const themeStorageKey = "waykeep-theme-v1";
@@ -653,6 +659,9 @@
 		const mapFrame = document.getElementById("route-map");
 		const mapEmpty = document.getElementById("map-empty");
 		const mapLink = document.getElementById("open-map");
+		const shareRouteButton = document.getElementById("share-route");
+		const noRouteSelected = document.getElementById("no-route-selected");
+		const routeStats = document.getElementById("route-stats");
 		let mapLoadTimer;
 		mapFrame.addEventListener("load", () => {
 			clearTimeout(mapLoadTimer);
@@ -672,7 +681,7 @@
 		const themeNames = ["forest", "light", "dark", "system"];
 		let toastTimer;
 		let routes = loadRoutes();
-		let selectedId = (routes.find((route) => route.id !== starterRoute.id) || starterRoute).id;
+		let selectedId = routes[0]?.id ?? null;
 		let routeToRenameId = null;
 		let activeCategory = "mine";
 
@@ -790,18 +799,15 @@
 				const currentValue = localStorage.getItem(storageKey);
 				const saved = JSON.parse(currentValue ?? localStorage.getItem(legacyStorageKey));
 				if (Array.isArray(saved)) {
-					const loadedRoutes = [
-					starterRoute,
-					...saved.filter((route) =>
-						route && route.id !== starterRoute.id && isOnTheGoMapUrl(route.url)
+					const loadedRoutes = saved.filter((route) =>
+						route && isOnTheGoMapUrl(route.url)
 					).map((route) => ({
 						...route,
 						type: getRouteType(route.url)
-					}))
-					];
+					}));
 					if (currentValue === null) {
 						try {
-							localStorage.setItem(storageKey, JSON.stringify(loadedRoutes.filter((route) => route.id !== starterRoute.id)));
+							localStorage.setItem(storageKey, JSON.stringify(loadedRoutes));
 						} catch (error) {
 							showToast("Could not migrate saved routes in this browser.");
 						}
@@ -809,14 +815,14 @@
 					return loadedRoutes;
 				}
 			} catch (error) {
-				return [starterRoute];
+				return [];
 			}
-			return [starterRoute];
+			return [];
 		}
 
 		function persistRoutes() {
 			try {
-				localStorage.setItem(storageKey, JSON.stringify(routes.filter((route) => route.id !== starterRoute.id)));
+				localStorage.setItem(storageKey, JSON.stringify(routes));
 			} catch (error) {
 				showToast("Could not save routes in this browser.");
 			}
@@ -827,10 +833,8 @@
 			const maximumDistance = Number(distanceMax.value);
 			return routes.filter((route) => {
 				const distance = Number(route.distance);
-				return route.id !== starterRoute.id &&
-					Number.isFinite(distance) &&
-					distance >= minimumDistance &&
-					distance <= maximumDistance;
+				return route.distance == null || !Number.isFinite(distance) ||
+					(distance >= minimumDistance && distance <= maximumDistance);
 			});
 		}
 
@@ -848,6 +852,16 @@
 				comingSoon.textContent = "Coming soon!";
 				comingSoon.setAttribute("role", "status");
 				routeList.append(comingSoon);
+			} else if (routes.length === 0) {
+				const emptyState = document.createElement("p");
+				emptyState.className = "route-empty no-routes-empty";
+				emptyState.setAttribute("role", "status");
+				const title = document.createElement("strong");
+				title.textContent = "No routes added";
+				const instructions = document.createElement("span");
+				instructions.textContent = "Select Add a route, create a map on On The Go Map, then paste its link to save it here.";
+				emptyState.append(title, instructions);
+				routeList.append(emptyState);
 			}
 			const categoryRoutes = activeCategory === "mine" ? filteredMyRoutes : filteredPublicRoutes;
 			renderRouteList(categoryRoutes, routeList);
@@ -866,7 +880,7 @@
 		function renderRouteList(categoryRoutes, list) {
 			categoryRoutes.forEach((route) => {
 				const entry = document.createElement("div");
-				entry.className = `route-entry${route.id !== starterRoute.id ? " has-actions" : ""}`;
+				entry.className = "route-entry has-actions";
 				entry.setAttribute("role", "listitem");
 				entry.dataset.routeId = route.id;
 				const item = document.createElement("button");
@@ -874,52 +888,49 @@
 				item.className = `route-item${route.id === selectedId ? " active" : ""}`;
 				item.setAttribute("aria-pressed", String(route.id === selectedId));
 				item.setAttribute("aria-label", `${route.name}${route.distance ? `, ${Number(route.distance).toFixed(2)} kilometers` : ""}`);
-				if (route.id !== starterRoute.id) {
-					entry.draggable = true;
-					item.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
-					item.title = "Drag this route to reorder. Press Alt+Up or Alt+Down to move it.";
-					item.addEventListener("keydown", (event) => {
-						if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
+				entry.draggable = true;
+				item.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
+				item.title = "Drag this route to reorder. Press Alt+Up or Alt+Down to move it.";
+				item.addEventListener("keydown", (event) => {
+					if (!event.altKey || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
+					event.preventDefault();
+					const currentIndex = routes.findIndex((entry) => entry.id === route.id);
+					const targetIndex = currentIndex + (event.key === "ArrowUp" ? -1 : 1);
+					if (targetIndex < 0 || targetIndex >= routes.length) return;
+					reorderRoute(route.id, routes[targetIndex].id, event.key === "ArrowDown", true);
+				});
+				entry.addEventListener("dragstart", (event) => {
+					const sourceControl = event.target.closest("button");
+					if (sourceControl && !sourceControl.classList.contains("route-item")) {
 						event.preventDefault();
-						const savedRoutes = routes.filter((entry) => entry.id !== starterRoute.id);
-						const currentIndex = savedRoutes.findIndex((entry) => entry.id === route.id);
-						const targetIndex = currentIndex + (event.key === "ArrowUp" ? -1 : 1);
-						if (targetIndex < 0 || targetIndex >= savedRoutes.length) return;
-						reorderRoute(route.id, savedRoutes[targetIndex].id, event.key === "ArrowDown", true);
-					});
-					entry.addEventListener("dragstart", (event) => {
-						const sourceControl = event.target.closest("button");
-						if (sourceControl && !sourceControl.classList.contains("route-item")) {
-							event.preventDefault();
-							return;
-						}
-						event.dataTransfer.effectAllowed = "move";
-						event.dataTransfer.setData("text/plain", route.id);
-						entry.classList.add("dragging");
-					});
-					entry.addEventListener("dragend", () => {
-						entry.classList.remove("dragging");
-						routeList.querySelectorAll(".route-entry.drag-over").forEach((target) => target.classList.remove("drag-over", "drag-over-after"));
-					});
-					entry.addEventListener("dragover", (event) => {
-						if (!routeList.querySelector(".route-entry.dragging")) return;
-						event.preventDefault();
-						event.dataTransfer.dropEffect = "move";
-						entry.classList.add("drag-over");
-						const bounds = entry.getBoundingClientRect();
-						entry.classList.toggle("drag-over-after", event.clientY > bounds.top + bounds.height / 2);
-					});
-					entry.addEventListener("dragleave", (event) => {
-						if (!entry.contains(event.relatedTarget)) entry.classList.remove("drag-over", "drag-over-after");
-					});
-					entry.addEventListener("drop", (event) => {
-						event.preventDefault();
-						entry.classList.remove("drag-over", "drag-over-after");
-						const sourceId = event.dataTransfer.getData("text/plain");
-						const bounds = entry.getBoundingClientRect();
-						reorderRoute(sourceId, route.id, event.clientY > bounds.top + bounds.height / 2);
-					});
-				}
+						return;
+					}
+					event.dataTransfer.effectAllowed = "move";
+					event.dataTransfer.setData("text/plain", route.id);
+					entry.classList.add("dragging");
+				});
+				entry.addEventListener("dragend", () => {
+					entry.classList.remove("dragging");
+					routeList.querySelectorAll(".route-entry.drag-over").forEach((target) => target.classList.remove("drag-over", "drag-over-after"));
+				});
+				entry.addEventListener("dragover", (event) => {
+					if (!routeList.querySelector(".route-entry.dragging")) return;
+					event.preventDefault();
+					event.dataTransfer.dropEffect = "move";
+					entry.classList.add("drag-over");
+					const bounds = entry.getBoundingClientRect();
+					entry.classList.toggle("drag-over-after", event.clientY > bounds.top + bounds.height / 2);
+				});
+				entry.addEventListener("dragleave", (event) => {
+					if (!entry.contains(event.relatedTarget)) entry.classList.remove("drag-over", "drag-over-after");
+				});
+				entry.addEventListener("drop", (event) => {
+					event.preventDefault();
+					entry.classList.remove("drag-over", "drag-over-after");
+					const sourceId = event.dataTransfer.getData("text/plain");
+					const bounds = entry.getBoundingClientRect();
+					reorderRoute(sourceId, route.id, event.clientY > bounds.top + bounds.height / 2);
+				});
 
 				const top = document.createElement("span");
 				top.className = "route-top";
@@ -936,44 +947,40 @@
 				const dot = document.createElement("span");
 				dot.className = "route-dot";
 				dot.setAttribute("aria-hidden", "true");
-				const routeNumber = route.id === starterRoute.id
-					? 1
-					: routes.filter((entry) => entry.id !== starterRoute.id).findIndex((entry) => entry.id === route.id) + 1;
-				sub.append(dot, document.createTextNode(`${route.id === starterRoute.id ? route.kind || "Route" : route.type} · ${String(routeNumber).padStart(2, "0")}`));
+				const routeNumber = routes.findIndex((entry) => entry.id === route.id) + 1;
+				sub.append(dot, document.createTextNode(`${route.type} · ${String(routeNumber).padStart(2, "0")}`));
 				item.append(top, sub);
 				entry.append(item);
 
-				if (route.id !== starterRoute.id) {
-					const actions = document.createElement("div");
-					actions.className = "route-actions";
-					const rename = document.createElement("button");
-					rename.type = "button";
-					rename.className = "route-action rename-route";
-					rename.textContent = "Rename";
-					rename.setAttribute("aria-label", `Rename ${route.name}`);
-					rename.addEventListener("click", (event) => {
-						event.stopPropagation();
-						routeToRenameId = route.id;
-						document.getElementById("rename-route-input").value = route.name;
-						document.getElementById("rename-error").textContent = "";
-						renameDialog.showModal();
-						document.getElementById("rename-route-input").focus();
-						document.getElementById("rename-route-input").select();
-					});
-					actions.append(rename);
+				const actions = document.createElement("div");
+				actions.className = "route-actions";
+				const rename = document.createElement("button");
+				rename.type = "button";
+				rename.className = "route-action rename-route";
+				rename.textContent = "Rename";
+				rename.setAttribute("aria-label", `Rename ${route.name}`);
+				rename.addEventListener("click", (event) => {
+					event.stopPropagation();
+					routeToRenameId = route.id;
+					document.getElementById("rename-route-input").value = route.name;
+					document.getElementById("rename-error").textContent = "";
+					renameDialog.showModal();
+					document.getElementById("rename-route-input").focus();
+					document.getElementById("rename-route-input").select();
+				});
+				actions.append(rename);
 
-					const remove = document.createElement("button");
-					remove.type = "button";
-					remove.className = "route-action remove-route";
-					remove.textContent = "Remove";
-					remove.setAttribute("aria-label", `Remove ${route.name}`);
-					remove.addEventListener("click", (event) => {
-						event.stopPropagation();
-						deleteRoute(route.id);
-					});
-					actions.append(remove);
-					entry.append(actions);
-				}
+				const remove = document.createElement("button");
+				remove.type = "button";
+				remove.className = "route-action remove-route";
+				remove.textContent = "Remove";
+				remove.setAttribute("aria-label", `Remove ${route.name}`);
+				remove.addEventListener("click", (event) => {
+					event.stopPropagation();
+					deleteRoute(route.id);
+				});
+				actions.append(remove);
+				entry.append(actions);
 				item.addEventListener("click", () => selectRoute(route.id));
 				list.append(entry);
 			});
@@ -981,7 +988,7 @@
 
 		function reorderRoute(sourceId, targetId, placeAfter, restoreFocus = false) {
 			if (!sourceId || !targetId || sourceId === targetId) return;
-			const savedRoutes = routes.filter((route) => route.id !== starterRoute.id);
+			const savedRoutes = [...routes];
 			const sourceIndex = savedRoutes.findIndex((route) => route.id === sourceId);
 			const targetIndex = savedRoutes.findIndex((route) => route.id === targetId);
 			if (sourceIndex < 0 || targetIndex < 0) return;
@@ -989,15 +996,13 @@
 			const [movedRoute] = savedRoutes.splice(sourceIndex, 1);
 			const insertionIndex = savedRoutes.findIndex((route) => route.id === targetId) + (placeAfter ? 1 : 0);
 			savedRoutes.splice(insertionIndex, 0, movedRoute);
-			routes = [starterRoute, ...savedRoutes];
+			routes = savedRoutes;
 			persistRoutes();
 			renderRoutes();
 
 			const selectedRoute = routes.find((route) => route.id === selectedId);
 			if (selectedRoute) {
-				const routeIndex = selectedRoute.id === starterRoute.id
-					? 0
-					: savedRoutes.findIndex((route) => route.id === selectedRoute.id);
+				const routeIndex = savedRoutes.findIndex((route) => route.id === selectedRoute.id);
 				document.getElementById("active-kind").textContent = `${(selectedRoute.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			}
 			if (restoreFocus) {
@@ -1011,15 +1016,35 @@
 			selectedId = id;
 			renderRoutes();
 			document.getElementById("active-name").textContent = route.name;
-			const routeIndex = route.id === starterRoute.id ? 0 : routes.filter((entry) => entry.id !== starterRoute.id).indexOf(route);
+			const routeIndex = routes.indexOf(route);
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
 			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
 			clearTimeout(mapLoadTimer);
+			mapFrame.parentElement.classList.remove("is-empty");
 			mapFrame.parentElement.classList.add("is-loading");
 			mapEmpty.style.display = "none";
+			noRouteSelected.hidden = true;
+			routeStats.hidden = false;
+			mapLink.hidden = false;
+			shareRouteButton.hidden = false;
 			mapFrame.src = route.url;
 			mapLink.href = route.url;
+		}
+
+		function clearSelectedRoute() {
+			selectedId = null;
+			document.getElementById("active-name").textContent = "No route selected";
+			document.getElementById("active-kind").textContent = "";
+			clearTimeout(mapLoadTimer);
+			mapFrame.parentElement.classList.remove("is-loading");
+			mapFrame.parentElement.classList.add("is-empty");
+			mapFrame.removeAttribute("src");
+			mapEmpty.style.display = "none";
+			noRouteSelected.hidden = false;
+			routeStats.hidden = true;
+			mapLink.hidden = true;
+			shareRouteButton.hidden = true;
 		}
 
 		routeTabs.addEventListener("click", (event) => {
@@ -1062,13 +1087,28 @@
 		});
 		distanceMin.addEventListener("input", () => updateDistanceFilter(distanceMin));
 		distanceMax.addEventListener("input", () => updateDistanceFilter(distanceMax));
+		shareRouteButton.addEventListener("click", async () => {
+			const route = routes.find((entry) => entry.id === selectedId);
+			if (!route) return;
+			if (!navigator.clipboard?.writeText) {
+				showToast("Clipboard access isn't available in this browser.");
+				return;
+			}
+			try {
+				await navigator.clipboard.writeText(route.url);
+				showToast("Route link copied to clipboard.");
+			} catch {
+				showToast("Could not copy the route link. Check clipboard permissions.");
+			}
+		});
 
 		function deleteRoute(id) {
 			routes = routes.filter((route) => route.id !== id);
 			persistRoutes();
-			if (selectedId === id) selectedId = routes[0].id;
+			if (selectedId === id) selectedId = routes[0]?.id ?? null;
 			renderRoutes();
 			if (selectedId) selectRoute(selectedId);
+			else clearSelectedRoute();
 			showToast("Route removed.");
 		}
 
@@ -1180,7 +1220,8 @@
 
 		updateDistanceFilter();
 		renderRoutes();
-		selectRoute(selectedId);
+		if (selectedId) selectRoute(selectedId);
+		else clearSelectedRoute();
 	</script>
 </body>
 </html>
