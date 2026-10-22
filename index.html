@@ -343,7 +343,7 @@
 		.map-title h2 { margin: 0 0 5px; overflow: hidden; font: 600 19px/1.15 var(--serif); letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
 		.map-title p { margin: 0; color: var(--muted); font: 10px var(--mono); letter-spacing: .045em; text-transform: uppercase; }
 		.open-map { flex: none; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--button-text); font-size: 11px; font-weight: 700; text-decoration: none; }
-		.open-map-arrow { width: 1em; height: 1em; flex: none; }
+		.open-map-arrow { width: .8em; height: .8em; flex: none; }
 		.map-frame { position: relative; min-height: 420px; aspect-ratio: 1.6; background: var(--map-bg); }
 		.map-frame iframe { display: block; width: 100%; height: 100%; min-height: 420px; border: 0; }
 		.map-frame.is-empty iframe, .map-frame.is-empty .map-loading { display: none; }
@@ -359,11 +359,14 @@
 		.map-loader-pin { fill: var(--coral); transform-box: fill-box; transform-origin: center; animation: pin-bob 1.8s ease-in-out infinite; }
 		.map-loader-pin-center { fill: var(--white); }
 		.map-loading-label { font: 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-		.map-loading-dots { display: inline-block; width: 1.2em; text-align: left; animation: loading-dots 1.2s steps(4, end) infinite; }
+		.map-loading-dots { display: inline-flex; width: 1.2em; text-align: left; }
+		.map-loading-dot { animation: loading-dot 1.2s ease-in-out infinite; opacity: .3; }
+		.map-loading-dot:nth-child(2) { animation-delay: .2s; }
+		.map-loading-dot:nth-child(3) { animation-delay: .4s; }
 		.map-empty { display: none; position: absolute; inset: 0; padding: 28px; place-items: center; background: radial-gradient(ellipse at 18% 28%, transparent 0 14%, color-mix(in srgb, var(--ink) 8%, transparent) 14.2% 14.5%, transparent 14.7% 23%, color-mix(in srgb, var(--ink) 8%, transparent) 23.2% 23.5%, transparent 23.7%), radial-gradient(ellipse at 78% 64%, transparent 0 19%, color-mix(in srgb, var(--ink) 8%, transparent) 19.2% 19.5%, transparent 19.7% 29%, color-mix(in srgb, var(--ink) 8%, transparent) 29.2% 29.5%, transparent 29.7%), var(--map-bg); text-align: center; }
 		@keyframes route-draw { 0% { stroke-dashoffset: 46; opacity: .45; } 50% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .45; } }
 		@keyframes pin-bob { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-3px); } }
-		@keyframes loading-dots { 0% { width: 0; } 100% { width: 1.2em; } }
+		@keyframes loading-dot { 0%, 100% { opacity: .3; } 35%, 65% { opacity: 1; } }
 		.empty-inner { max-width: 280px; }
 		.empty-inner strong { display: block; margin-bottom: 8px; font: 500 25px var(--serif); }
 		.empty-inner span { color: var(--empty-copy); font-size: 13px; line-height: 1.6; }
@@ -575,7 +578,7 @@
 									<circle class="map-loader-pin-center" cx="42" cy="27" r="3"></circle>
 								</g>
 							</svg>
-							<span class="map-loading-label">Finding your route<span class="map-loading-dots" aria-hidden="true">...</span></span>
+							<span class="map-loading-label">Finding your route<span class="map-loading-dots" aria-hidden="true"><span class="map-loading-dot">.</span><span class="map-loading-dot">.</span><span class="map-loading-dot">.</span></span></span>
 						</div>
 					</div>
 					<div class="map-empty" id="map-empty">
