@@ -5,8 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="theme-color" content="#f4f4f4">
 	<title>ᴡᴀʏᴋᴇᴇᴘ - ʀᴏᴜᴛᴇ ʟɪʙʀᴀʀʏ</title>
-	<link rel="icon" type="image/svg+xml" href="./favicon.svg">
-	<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+	<link rel="icon" type="image/jpeg" href="./logo.jpeg">
+	<link rel="apple-touch-icon" sizes="180x180" href="./logo.jpeg">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -215,9 +215,9 @@
 			animation: header-enter .65s cubic-bezier(.2,.75,.25,1) both;
 		}
 		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .02em; }
-		.brand-mark { display: block; width: 27px; height: 27px; flex: none; border-radius: 7px; background: #000; transition: transform .35s cubic-bezier(.2,.75,.25,1), box-shadow .35s ease; }
+		.brand-mark { display: block; width: 27px; height: 27px; flex: none; border-radius: 7px; object-fit: cover; background: #000; transition: transform .35s cubic-bezier(.2,.75,.25,1), box-shadow .35s ease; }
 		.brand:hover .brand-mark { transform: rotate(-8deg) scale(1.08); box-shadow: 0 4px 14px #0004; }
-		.brand img.brand-mark { display: none; }
+		.brand img[src^="data:"], .brand svg.brand-mark { display: none; }
 		.brand-name { font: 700 18px/27px; letter-spacing: .07em; }
 		.topbar-actions { display: flex; align-items: center; gap: 22px; }
 		.top-note { display: flex; align-items: center; gap: 9px; color: var(--topbar-text); opacity: .8; font: 11px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
@@ -507,6 +507,7 @@
 				<path d="M10 29 29 10l-5 15-14 4Z" fill="#d4f06b"></path>
 				<path d="m19 21 10-11-4 15-6-4Z" fill="#ff8069"></path>
 			</svg>
+			<img class="brand-mark" src="./logo.jpeg" alt="" aria-hidden="true">
 			<span class="brand-name">ᴡᴀʏᴋᴇᴇᴘ</span>
 		</a>
 		<div class="topbar-actions">
