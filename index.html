@@ -1372,17 +1372,22 @@
 		async function encodeRouteTransferData(data) {
 			const compactData = [1, data.routes.map((route) => [route.name, route.url])];
 			const bytes = new TextEncoder().encode(JSON.stringify(compactData));
+			const compactPayload = `w=j.${encodeBase64Url(bytes)}`;
+			let shortestPayload = compactPayload;
 			if (typeof CompressionStream === "function" && typeof DecompressionStream === "function") {
 				try {
 					const compressed = await new Response(
 						new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"))
 					).arrayBuffer();
-					return `gz.${encodeBase64Url(new Uint8Array(compressed))}`;
+					const compressedPayload = `w=z.${encodeBase64Url(new Uint8Array(compressed))}`;
+					if (compressedPayload.length < shortestPayload.length) shortestPayload = compressedPayload;
 				} catch {
 					// Compression can be unavailable in restricted browser contexts; use the compact format.
 				}
 			}
-			return `j.${encodeBase64Url(bytes)}`;
+			const legacyPayload = `waykeep=${encodeBase64Url(new TextEncoder().encode(JSON.stringify(data)))}`;
+			if (legacyPayload.length < shortestPayload.length) shortestPayload = legacyPayload;
+			return shortestPayload;
 		}
 
 		async function decodeRouteTransferData(encoded) {
@@ -1391,7 +1396,7 @@
 			const encoding = encoded.slice(0, prefixEnd);
 			const bytes = decodeBase64Url(encoded.slice(prefixEnd + 1));
 			let decodedBytes = bytes;
-			if (encoding === "gz") {
+			if (encoding === "gz" || encoding === "z") {
 				if (typeof DecompressionStream !== "function") {
 					throw new Error("This browser cannot open compressed route links. Try a newer browser.");
 				}
@@ -1418,7 +1423,8 @@
 			try {
 				const url = new URL(input);
 				const match = url.hash.match(/^#waykeep=([A-Za-z0-9_-]+)$/) ||
-					url.hash.match(/^#wz=((?:gz|j)\.[A-Za-z0-9_-]+)$/);
+					url.hash.match(/^#wz=((?:gz|j)\.[A-Za-z0-9_-]+)$/) ||
+					url.hash.match(/^#w=((?:z|j)\.[A-Za-z0-9_-]+)$/);
 				if (!match) throw new Error("This link does not contain a Waykeep route export.");
 				if (url.hash.startsWith("#waykeep=")) {
 					const legacyBytes = decodeBase64Url(match[1]);
@@ -1494,7 +1500,7 @@
 				routes: routes.map((route) => ({ name: route.name, url: route.url }))
 			};
 			const transferUrl = new URL(window.location.href);
-			transferUrl.hash = `wz=${await encodeRouteTransferData(exportData)}`;
+			transferUrl.hash = await encodeRouteTransferData(exportData);
 			const transferLink = transferUrl.href;
 			try {
 				await navigator.clipboard.writeText(transferLink);
