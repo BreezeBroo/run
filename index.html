@@ -420,16 +420,10 @@
 		.settings-section-title { margin: 0 25px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 		.theme-section-title { margin-top: 20px; padding-top: 0; border-top: 0; }
 		.unit-options { padding-top: 12px; }
-		.route-transfer-options { display: grid; gap: 9px; padding: 12px 25px 25px; }
-		.route-transfer-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; }
-		.route-transfer-copy { display: grid; gap: 3px; }
-		.route-transfer-copy strong { font-size: 13px; }
-		.route-transfer-copy span { color: var(--muted); font-size: 11px; line-height: 1.4; }
-		.route-transfer-option textarea { grid-column: 1 / -1; width: 100%; min-height: 64px; padding: 9px 10px; resize: vertical; border: 1px solid var(--input-border); border-radius: 8px; outline: none; background: var(--input-bg); color: var(--ink); font: 11px/1.5 var(--mono); }
-		.route-transfer-option textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
-		.route-transfer-option button { flex: none; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .18s ease, transform .2s ease; }
-		.route-transfer-option button:hover { background: var(--hover); transform: translateY(-2px); }
-		.route-transfer-option button:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+		.route-transfer-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 12px 25px 25px; }
+		.route-transfer-options button { min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .18s ease, transform .2s ease; }
+		.route-transfer-options button:hover { background: var(--hover); transform: translateY(-2px); }
+		.route-transfer-options button:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
 		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
 		.theme-swatch.dark { --preview-accent: #090909; --preview-muted: #777777; --preview-surface: #1e1e1e; --preview-map: #292929; --preview-route: #d7d7d7; }
@@ -688,18 +682,8 @@
 		</div>
 		<h3 class="settings-section-title">Route transfer</h3>
 		<div class="route-transfer-options">
-			<div class="route-transfer-option">
-				<span class="route-transfer-copy"><strong>Export routes</strong><span>Copy a link you can paste into Waykeep on another device.</span></span>
-				<button id="export-routes" type="button">Copy link</button>
-				<textarea id="route-export-link" aria-label="Route transfer link" readonly hidden></textarea>
-			</div>
-			<div class="route-transfer-option">
-				<span class="route-transfer-copy"><strong>Import routes</strong><span>Paste a transfer link or exported JSON. Routes are added to this collection.</span></span>
-				<button id="import-pasted-routes" type="button">Add routes</button>
-				<textarea id="route-import-input" aria-label="Paste a route transfer link or JSON" placeholder="Paste a Waykeep transfer link or exported JSON"></textarea>
-				<button id="import-routes" type="button">Choose file</button>
-				<input id="import-routes-file" type="file" accept=".json,application/json" hidden>
-			</div>
+			<button id="export-routes" type="button">Copy export link</button>
+			<button id="import-routes" type="button">Import from link</button>
 		</div>
 	</dialog>
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1368,15 +1352,14 @@
 
 		function parseRouteTransferInput(value) {
 			const input = value.trim();
-			if (!input) throw new Error("Paste a Waykeep transfer link or exported JSON.");
-			if (input.startsWith("{")) return JSON.parse(input);
+			if (!input) throw new Error("Paste a Waykeep route transfer link.");
 			try {
 				const url = new URL(input);
 				const match = url.hash.match(/^#waykeep=([A-Za-z0-9_-]+)$/);
 				if (!match) throw new Error("This link does not contain a Waykeep route export.");
 				return decodeRouteTransferData(match[1]);
 			} catch (error) {
-				if (error instanceof TypeError) throw new Error("Paste a valid Waykeep transfer link or exported JSON.");
+				if (error instanceof TypeError) throw new Error("Paste a valid Waykeep route transfer link.");
 				throw error;
 			}
 		}
@@ -1446,38 +1429,21 @@
 			const transferUrl = new URL(window.location.href);
 			transferUrl.hash = `waykeep=${encodeRouteTransferData(exportData)}`;
 			const transferLink = transferUrl.href;
-			const exportLinkField = document.getElementById("route-export-link");
-			exportLinkField.value = transferLink;
-			exportLinkField.hidden = false;
 			try {
 				await navigator.clipboard.writeText(transferLink);
 				showToast("Transfer link copied. Paste it into Waykeep on the other device.");
 			} catch {
-				exportLinkField.focus();
-				exportLinkField.select();
-				showToast("Transfer link ready. Copy it from the field below.");
+				window.prompt("Copy this route transfer link:", transferLink);
 			}
 		});
 
-		const importRoutesFile = document.getElementById("import-routes-file");
-		document.getElementById("import-routes").addEventListener("click", () => importRoutesFile.click());
-		document.getElementById("import-pasted-routes").addEventListener("click", async () => {
+		document.getElementById("import-routes").addEventListener("click", async () => {
+			const transferLink = window.prompt("Paste a Waykeep route transfer link:");
+			if (transferLink === null) return;
 			try {
-				await importRoutesData(parseRouteTransferInput(document.getElementById("route-import-input").value));
-				document.getElementById("route-import-input").value = "";
+				await importRoutesData(parseRouteTransferInput(transferLink));
 			} catch (error) {
-				showToast(error instanceof SyntaxError ? "The pasted JSON is invalid." : error instanceof Error ? error.message : "Could not import routes.");
-			}
-		});
-		importRoutesFile.addEventListener("change", async () => {
-			const file = importRoutesFile.files[0];
-			if (!file) return;
-			try {
-				await importRoutesData(JSON.parse(await file.text()));
-			} catch (error) {
-				showToast(error instanceof SyntaxError ? "This file is not valid JSON." : error instanceof Error ? error.message : "Could not import routes.");
-			} finally {
-				importRoutesFile.value = "";
+				showToast(error instanceof Error ? error.message : "Could not import routes.");
 			}
 		});
 
