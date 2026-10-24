@@ -422,8 +422,9 @@
 		.theme-section-title { margin-top: 20px; padding-top: 0; border-top: 0; }
 		.unit-options { padding-top: 12px; }
 		.route-transfer-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 12px 25px 25px; }
-		.route-transfer-options button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .18s ease, transform .2s ease; }
-		.route-transfer-options button:hover { background: var(--hover); transform: translateY(-2px); }
+		.route-transfer-options button { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--button-text); font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; transition: border-color .18s ease, background .18s ease, transform .2s ease; }
+		.route-transfer-options .button-icon { width: 17px; height: 17px; }
+		.route-transfer-options button:hover { border-color: var(--route-distance); background: var(--hover); transform: translateY(-2px); }
 		.route-transfer-options button:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
 		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
@@ -687,11 +688,11 @@
 		</div>
 		<h3 class="settings-section-title">Route transfer</h3>
 		<div class="route-transfer-options">
-			<button id="export-routes" type="button">Export
-				<svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5"></path><path d="M5 17v3h14v-3"></path></svg>
+			<button id="export-routes" type="button"><span>Export routes</span>
+				<svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5M12 15V3"></path></svg>
 			</button>
-			<button id="import-routes" type="button">Import
-				<svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21V9m-5 5 5-5 5 5"></path><path d="M5 7V4h14v3"></path></svg>
+			<button id="import-routes" type="button"><span>Import routes</span>
+				<svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5-5 5 5M12 5v12"></path></svg>
 			</button>
 		</div>
 	</dialog>
