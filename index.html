@@ -421,10 +421,12 @@
 		.theme-section-title { margin-top: 20px; padding-top: 0; border-top: 0; }
 		.unit-options { padding-top: 12px; }
 		.route-transfer-options { display: grid; gap: 9px; padding: 12px 25px 25px; }
-		.route-transfer-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; }
+		.route-transfer-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; }
 		.route-transfer-copy { display: grid; gap: 3px; }
 		.route-transfer-copy strong { font-size: 13px; }
 		.route-transfer-copy span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+		.route-transfer-option textarea { grid-column: 1 / -1; width: 100%; min-height: 64px; padding: 9px 10px; resize: vertical; border: 1px solid var(--input-border); border-radius: 8px; outline: none; background: var(--input-bg); color: var(--ink); font: 11px/1.5 var(--mono); }
+		.route-transfer-option textarea:focus { border-color: var(--route-distance); box-shadow: 0 0 0 3px var(--focus-ring); }
 		.route-transfer-option button { flex: none; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .18s ease, transform .2s ease; }
 		.route-transfer-option button:hover { background: var(--hover); transform: translateY(-2px); }
 		.route-transfer-option button:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
@@ -687,11 +689,14 @@
 		<h3 class="settings-section-title">Route transfer</h3>
 		<div class="route-transfer-options">
 			<div class="route-transfer-option">
-				<span class="route-transfer-copy"><strong>Export routes</strong><span>Download a file you can import on another device.</span></span>
-				<button id="export-routes" type="button">Export</button>
+				<span class="route-transfer-copy"><strong>Export routes</strong><span>Copy a link you can paste into Waykeep on another device.</span></span>
+				<button id="export-routes" type="button">Copy link</button>
+				<textarea id="route-export-link" aria-label="Route transfer link" readonly hidden></textarea>
 			</div>
 			<div class="route-transfer-option">
-				<span class="route-transfer-copy"><strong>Import routes</strong><span>Add routes from a Waykeep export without replacing this collection.</span></span>
+				<span class="route-transfer-copy"><strong>Import routes</strong><span>Paste a transfer link or exported JSON. Routes are added to this collection.</span></span>
+				<button id="import-pasted-routes" type="button">Add routes</button>
+				<textarea id="route-import-input" aria-label="Paste a route transfer link or JSON" placeholder="Paste a Waykeep transfer link or exported JSON"></textarea>
 				<button id="import-routes" type="button">Choose file</button>
 				<input id="import-routes-file" type="file" accept=".json,application/json" hidden>
 			</div>
@@ -1344,7 +1349,91 @@
 			return Number.isFinite(meters) && meters > 0 ? meters / 1000 : null;
 		}
 
-		document.getElementById("export-routes").addEventListener("click", () => {
+		function encodeRouteTransferData(data) {
+			const bytes = new TextEncoder().encode(JSON.stringify(data));
+			const chunks = [];
+			for (let index = 0; index < bytes.length; index += 0x8000) {
+				chunks.push(String.fromCharCode(...bytes.subarray(index, index + 0x8000)));
+			}
+			return btoa(chunks.join("")).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+		}
+
+		function decodeRouteTransferData(encoded) {
+			if (!/^[A-Za-z0-9_-]+$/.test(encoded)) throw new Error("This transfer link is invalid.");
+			const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+			const binary = atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, "="));
+			const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+			return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+		}
+
+		function parseRouteTransferInput(value) {
+			const input = value.trim();
+			if (!input) throw new Error("Paste a Waykeep transfer link or exported JSON.");
+			if (input.startsWith("{")) return JSON.parse(input);
+			try {
+				const url = new URL(input);
+				const match = url.hash.match(/^#waykeep=([A-Za-z0-9_-]+)$/);
+				if (!match) throw new Error("This link does not contain a Waykeep route export.");
+				return decodeRouteTransferData(match[1]);
+			} catch (error) {
+				if (error instanceof TypeError) throw new Error("Paste a valid Waykeep transfer link or exported JSON.");
+				throw error;
+			}
+		}
+
+		async function importRoutesData(importData) {
+			if (
+				!importData ||
+				importData.format !== "waykeep-routes" ||
+				importData.version !== 1 ||
+				!Array.isArray(importData.routes)
+			) {
+				throw new Error("Choose a valid Waykeep routes export.");
+			}
+			const existingIds = new Set(routes.map((route) => route.id));
+			const importedRoutes = importData.routes.map((route, index) => {
+				if (!route || typeof route.name !== "string" || typeof route.url !== "string") {
+					throw new Error(`Route ${index + 1} in this export is invalid.`);
+				}
+				const name = route.name.trim();
+				if (!name || name.length > 60) {
+					throw new Error(`Route ${index + 1} must have a name of 1 to 60 characters.`);
+				}
+				let url;
+				try {
+					url = getMapUrl(route.url);
+				} catch {
+					throw new Error(`Route ${index + 1} does not have a valid On The Go Map URL.`);
+				}
+				return {
+					id: createRouteId(existingIds),
+					name,
+					url,
+					distance: getRouteDistance(url),
+					kind: "Route",
+					type: getRouteType(url)
+				};
+			});
+			if (importedRoutes.length === 0) {
+				showToast("This export contains no routes.");
+				return;
+			}
+			const previousRoutes = routes;
+			routes = [...routes, ...importedRoutes];
+			const previousSelectedId = selectedId;
+			selectedId ??= importedRoutes[0].id;
+			if (!persistRoutes()) {
+				routes = previousRoutes;
+				selectedId = previousSelectedId;
+				return;
+			}
+			renderRoutes();
+			if (previousSelectedId) selectRoute(previousSelectedId);
+			else selectRoute(selectedId);
+			showToast(`Imported ${importedRoutes.length} ${importedRoutes.length === 1 ? "route" : "routes"}.`);
+		}
+
+		document.getElementById("export-routes").addEventListener("click", async () => {
 			if (routes.length === 0) {
 				showToast("There are no routes to export.");
 				return;
@@ -1354,72 +1443,37 @@
 				version: 1,
 				routes: routes.map((route) => ({ name: route.name, url: route.url }))
 			};
-			const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-			const downloadUrl = URL.createObjectURL(blob);
-			const downloadLink = document.createElement("a");
-			downloadLink.href = downloadUrl;
-			downloadLink.download = `waykeep-routes-${new Date().toISOString().slice(0, 10)}.json`;
-			downloadLink.click();
-			setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-			showToast(`Exported ${routes.length} ${routes.length === 1 ? "route" : "routes"}.`);
+			const transferUrl = new URL(window.location.href);
+			transferUrl.hash = `waykeep=${encodeRouteTransferData(exportData)}`;
+			const transferLink = transferUrl.href;
+			const exportLinkField = document.getElementById("route-export-link");
+			exportLinkField.value = transferLink;
+			exportLinkField.hidden = false;
+			try {
+				await navigator.clipboard.writeText(transferLink);
+				showToast("Transfer link copied. Paste it into Waykeep on the other device.");
+			} catch {
+				exportLinkField.focus();
+				exportLinkField.select();
+				showToast("Transfer link ready. Copy it from the field below.");
+			}
 		});
 
 		const importRoutesFile = document.getElementById("import-routes-file");
 		document.getElementById("import-routes").addEventListener("click", () => importRoutesFile.click());
+		document.getElementById("import-pasted-routes").addEventListener("click", async () => {
+			try {
+				await importRoutesData(parseRouteTransferInput(document.getElementById("route-import-input").value));
+				document.getElementById("route-import-input").value = "";
+			} catch (error) {
+				showToast(error instanceof SyntaxError ? "The pasted JSON is invalid." : error instanceof Error ? error.message : "Could not import routes.");
+			}
+		});
 		importRoutesFile.addEventListener("change", async () => {
 			const file = importRoutesFile.files[0];
 			if (!file) return;
 			try {
-				const importData = JSON.parse(await file.text());
-				if (
-					!importData ||
-					importData.format !== "waykeep-routes" ||
-					importData.version !== 1 ||
-					!Array.isArray(importData.routes)
-				) {
-					throw new Error("Choose a valid Waykeep routes export.");
-				}
-				const existingIds = new Set(routes.map((route) => route.id));
-				const importedRoutes = importData.routes.map((route, index) => {
-					if (!route || typeof route.name !== "string" || typeof route.url !== "string") {
-						throw new Error(`Route ${index + 1} in this file is invalid.`);
-					}
-					const name = route.name.trim();
-					if (!name || name.length > 60) {
-						throw new Error(`Route ${index + 1} must have a name of 1 to 60 characters.`);
-					}
-					let url;
-					try {
-						url = getMapUrl(route.url);
-					} catch {
-						throw new Error(`Route ${index + 1} does not have a valid On The Go Map URL.`);
-					}
-					return {
-						id: createRouteId(existingIds),
-						name,
-						url,
-						distance: getRouteDistance(url),
-						kind: "Route",
-						type: getRouteType(url)
-					};
-				});
-				if (importedRoutes.length === 0) {
-					showToast("This export contains no routes.");
-					return;
-				}
-				const previousRoutes = routes;
-				routes = [...routes, ...importedRoutes];
-				const previousSelectedId = selectedId;
-				selectedId ??= importedRoutes[0].id;
-				if (!persistRoutes()) {
-					routes = previousRoutes;
-					selectedId = previousSelectedId;
-					return;
-				}
-				renderRoutes();
-				if (previousSelectedId) selectRoute(previousSelectedId);
-				else selectRoute(selectedId);
-				showToast(`Imported ${importedRoutes.length} ${importedRoutes.length === 1 ? "route" : "routes"}.`);
+				await importRoutesData(JSON.parse(await file.text()));
 			} catch (error) {
 				showToast(error instanceof SyntaxError ? "This file is not valid JSON." : error instanceof Error ? error.message : "Could not import routes.");
 			} finally {
