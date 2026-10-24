@@ -420,6 +420,14 @@
 		.settings-section-title { margin: 0 25px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 		.theme-section-title { margin-top: 20px; padding-top: 0; border-top: 0; }
 		.unit-options { padding-top: 12px; }
+		.route-transfer-options { display: grid; gap: 9px; padding: 12px 25px 25px; }
+		.route-transfer-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; }
+		.route-transfer-copy { display: grid; gap: 3px; }
+		.route-transfer-copy strong { font-size: 13px; }
+		.route-transfer-copy span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+		.route-transfer-option button { flex: none; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--button-bg); color: var(--button-text); font-size: 11px; font-weight: 700; cursor: pointer; transition: background .18s ease, transform .2s ease; }
+		.route-transfer-option button:hover { background: var(--hover); transform: translateY(-2px); }
+		.route-transfer-option button:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
 		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
 		.theme-swatch.dark { --preview-accent: #090909; --preview-muted: #777777; --preview-surface: #1e1e1e; --preview-map: #292929; --preview-route: #d7d7d7; }
@@ -492,6 +500,7 @@
 			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
 			.dialog-head, .route-form, .theme-options { padding-left: 19px; padding-right: 19px; }
 			.settings-section-title { margin-right: 19px; margin-left: 19px; }
+			.route-transfer-options { padding-right: 19px; padding-left: 19px; }
 			#route-dialog .form-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; margin-right: -19px; margin-left: -19px; padding: 10px 12px; }
 			#route-dialog .form-actions button { min-width: 0; padding-right: 7px; padding-left: 7px; font-size: 11px; white-space: nowrap; }
 			#route-dialog .form-actions .create-route { justify-content: center; min-width: 0; margin-right: 0; padding-right: 5px; padding-left: 5px; font-size: 11px; white-space: nowrap; }
@@ -673,6 +682,18 @@
 			<div class="theme-option">
 				<input id="unit-miles" name="distance-unit" type="radio" value="mi">
 				<label for="unit-miles"><span class="theme-option-copy"><strong>Miles</strong><span>Show distances in miles</span></span></label>
+			</div>
+		</div>
+		<h3 class="settings-section-title">Route transfer</h3>
+		<div class="route-transfer-options">
+			<div class="route-transfer-option">
+				<span class="route-transfer-copy"><strong>Export routes</strong><span>Download a file you can import on another device.</span></span>
+				<button id="export-routes" type="button">Export</button>
+			</div>
+			<div class="route-transfer-option">
+				<span class="route-transfer-copy"><strong>Import routes</strong><span>Add routes from a Waykeep export without replacing this collection.</span></span>
+				<button id="import-routes" type="button">Choose file</button>
+				<input id="import-routes-file" type="file" accept=".json,application/json" hidden>
 			</div>
 		</div>
 	</dialog>
@@ -921,9 +942,20 @@
 		function persistRoutes() {
 			try {
 				localStorage.setItem(storageKey, JSON.stringify(routes));
+				return true;
 			} catch (error) {
 				showToast("Could not save routes in this browser.");
+				return false;
 			}
+		}
+
+		function createRouteId(existingIds = new Set()) {
+			let id;
+			do {
+				id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+			} while (existingIds.has(id));
+			existingIds.add(id);
+			return id;
 		}
 
 		function getFilteredMyRoutes() {
@@ -1312,6 +1344,89 @@
 			return Number.isFinite(meters) && meters > 0 ? meters / 1000 : null;
 		}
 
+		document.getElementById("export-routes").addEventListener("click", () => {
+			if (routes.length === 0) {
+				showToast("There are no routes to export.");
+				return;
+			}
+			const exportData = {
+				format: "waykeep-routes",
+				version: 1,
+				routes: routes.map((route) => ({ name: route.name, url: route.url }))
+			};
+			const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+			const downloadUrl = URL.createObjectURL(blob);
+			const downloadLink = document.createElement("a");
+			downloadLink.href = downloadUrl;
+			downloadLink.download = `waykeep-routes-${new Date().toISOString().slice(0, 10)}.json`;
+			downloadLink.click();
+			setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+			showToast(`Exported ${routes.length} ${routes.length === 1 ? "route" : "routes"}.`);
+		});
+
+		const importRoutesFile = document.getElementById("import-routes-file");
+		document.getElementById("import-routes").addEventListener("click", () => importRoutesFile.click());
+		importRoutesFile.addEventListener("change", async () => {
+			const file = importRoutesFile.files[0];
+			if (!file) return;
+			try {
+				const importData = JSON.parse(await file.text());
+				if (
+					!importData ||
+					importData.format !== "waykeep-routes" ||
+					importData.version !== 1 ||
+					!Array.isArray(importData.routes)
+				) {
+					throw new Error("Choose a valid Waykeep routes export.");
+				}
+				const existingIds = new Set(routes.map((route) => route.id));
+				const importedRoutes = importData.routes.map((route, index) => {
+					if (!route || typeof route.name !== "string" || typeof route.url !== "string") {
+						throw new Error(`Route ${index + 1} in this file is invalid.`);
+					}
+					const name = route.name.trim();
+					if (!name || name.length > 60) {
+						throw new Error(`Route ${index + 1} must have a name of 1 to 60 characters.`);
+					}
+					let url;
+					try {
+						url = getMapUrl(route.url);
+					} catch {
+						throw new Error(`Route ${index + 1} does not have a valid On The Go Map URL.`);
+					}
+					return {
+						id: createRouteId(existingIds),
+						name,
+						url,
+						distance: getRouteDistance(url),
+						kind: "Route",
+						type: getRouteType(url)
+					};
+				});
+				if (importedRoutes.length === 0) {
+					showToast("This export contains no routes.");
+					return;
+				}
+				const previousRoutes = routes;
+				routes = [...routes, ...importedRoutes];
+				const previousSelectedId = selectedId;
+				selectedId ??= importedRoutes[0].id;
+				if (!persistRoutes()) {
+					routes = previousRoutes;
+					selectedId = previousSelectedId;
+					return;
+				}
+				renderRoutes();
+				if (previousSelectedId) selectRoute(previousSelectedId);
+				else selectRoute(selectedId);
+				showToast(`Imported ${importedRoutes.length} ${importedRoutes.length === 1 ? "route" : "routes"}.`);
+			} catch (error) {
+				showToast(error instanceof SyntaxError ? "This file is not valid JSON." : error instanceof Error ? error.message : "Could not import routes.");
+			} finally {
+				importRoutesFile.value = "";
+			}
+		});
+
 		document.getElementById("add-route").addEventListener("click", () => {
 			document.getElementById("form-error").textContent = "";
 			routeDialog.showModal();
@@ -1358,7 +1473,7 @@
 			try {
 				const url = getMapUrl(form.elements.url.value);
 				const route = {
-					id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+					id: createRouteId(new Set(routes.map((entry) => entry.id))),
 					name: form.elements.name.value.trim(),
 					url,
 					distance: getRouteDistance(url),
