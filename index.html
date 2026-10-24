@@ -417,6 +417,8 @@
 		.theme-option input:checked + label { border-color: var(--route-distance); background: var(--active); }
 		.theme-option input:checked + label::after { border: 5px solid var(--route-distance); background: var(--white); }
 		.theme-option input:focus-visible + label { outline: 2px solid var(--coral); outline-offset: 2px; }
+		.settings-section-title { margin: 0 25px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.unit-options { padding-top: 12px; }
 		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
 		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
 		.theme-swatch.dark { --preview-accent: #090909; --preview-muted: #777777; --preview-surface: #1e1e1e; --preview-map: #292929; --preview-route: #d7d7d7; }
@@ -488,6 +490,7 @@
 			.stat { min-width: 0; flex: 1; padding: 14px 15px; }
 			.credit { width: 100%; margin: 0; padding: 11px 15px; border-top: 1px solid var(--line); text-align: left; }
 			.dialog-head, .route-form, .theme-options { padding-left: 19px; padding-right: 19px; }
+			.settings-section-title { margin-right: 19px; margin-left: 19px; }
 			#route-dialog .form-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; margin-right: -19px; margin-left: -19px; padding: 10px 12px; }
 			#route-dialog .form-actions button { min-width: 0; padding-right: 7px; padding-left: 7px; font-size: 11px; white-space: nowrap; }
 			#route-dialog .form-actions .create-route { justify-content: center; min-width: 0; margin-right: 0; padding-right: 5px; padding-left: 5px; font-size: 11px; white-space: nowrap; }
@@ -512,7 +515,7 @@
 		</a>
 		<div class="topbar-actions">
 			<span class="top-note">Your route library</span>
-			<button class="settings-button" id="settings-button" type="button" aria-label="Open appearance settings" aria-haspopup="dialog" aria-controls="settings-dialog" title="Appearance settings">
+			<button class="settings-button" id="settings-button" type="button" aria-label="Open settings" aria-haspopup="dialog" aria-controls="settings-dialog" title="Settings">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<path d="M10 2.75h4l.55 2.25a7.2 7.2 0 0 1 1.62.69l2.13-.73 2 3.46-1.58 1.56a7.2 7.2 0 0 1 0 1.83l1.58 1.56-2 3.46-2.13-.73a7.2 7.2 0 0 1-1.62.69L14 21.25h-4l-.55-2.25a7.2 7.2 0 0 1-1.62-.69l-2.13.73-2-3.46 1.58-1.56a7.2 7.2 0 0 1 0-1.83L3.7 10.63l2-3.46 2.13.73c.5-.3 1.04-.53 1.62-.69L10 2.75Z"></path>
 					<circle cx="12" cy="12" r="3"></circle>
@@ -638,8 +641,8 @@
 	</dialog>
 	<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description">
 		<div class="dialog-head">
-			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waykeep looks on this device.</p></div>
-			<button class="close-dialog" id="close-settings" type="button" aria-label="Close appearance settings">×</button>
+			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waykeep looks and displays distances on this device.</p></div>
+			<button class="close-dialog" id="close-settings" type="button" aria-label="Close settings">×</button>
 		</div>
 		<div class="theme-options" role="radiogroup" aria-label="Color theme">
 			<div class="theme-option">
@@ -659,6 +662,17 @@
 				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
 			</div>
 		</div>
+		<h3 class="settings-section-title">Distance units</h3>
+		<div class="theme-options unit-options" role="radiogroup" aria-label="Distance units">
+			<div class="theme-option">
+				<input id="unit-kilometers" name="distance-unit" type="radio" value="km">
+				<label for="unit-kilometers"><span class="theme-option-copy"><strong>Kilometers</strong><span>Show distances in kilometers</span></span></label>
+			</div>
+			<div class="theme-option">
+				<input id="unit-miles" name="distance-unit" type="radio" value="mi">
+				<label for="unit-miles"><span class="theme-option-copy"><strong>Miles</strong><span>Show distances in miles</span></span></label>
+			</div>
+		</div>
 	</dialog>
 	<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -667,6 +681,10 @@
 		const legacyStorageKey = "waymark-routes-v1";
 		const themeStorageKey = "waykeep-theme-v1";
 		const legacyThemeStorageKey = "waymark-theme-v1";
+		const distanceUnitStorageKey = "waykeep-distance-unit-v1";
+		const distanceUnits = ["km", "mi"];
+		const kilometersPerMile = 1.609344;
+		const maximumDistanceKilometers = 50;
 		const routeList = document.getElementById("route-list");
 		const routeTabs = document.getElementById("route-tabs");
 		const savedRoutesTab = document.getElementById("saved-routes-tab");
@@ -704,6 +722,60 @@
 		let selectedId = routes[0]?.id ?? null;
 		let routeToRenameId = null;
 		let activeCategory = "mine";
+		let distanceUnit = loadDistanceUnit();
+		document.getElementById(`unit-${distanceUnit === "km" ? "kilometers" : "miles"}`).checked = true;
+
+		function toDisplayDistance(kilometers) {
+			return distanceUnit === "mi" ? kilometers / kilometersPerMile : kilometers;
+		}
+
+		function toKilometers(distance) {
+			return distanceUnit === "mi" ? distance * kilometersPerMile : distance;
+		}
+
+		function getMaximumDisplayDistance() {
+			return Number(toDisplayDistance(maximumDistanceKilometers).toFixed(1));
+		}
+
+		function formatDistance(kilometers, decimalPlaces = 2) {
+			return `${toDisplayDistance(Number(kilometers)).toFixed(decimalPlaces)} ${distanceUnit}`;
+		}
+
+		function loadDistanceUnit() {
+			try {
+				const savedUnit = localStorage.getItem(distanceUnitStorageKey);
+				return distanceUnits.includes(savedUnit) ? savedUnit : "km";
+			} catch (error) {
+				showToast("Could not load saved distance settings.");
+				return "km";
+			}
+		}
+
+		function saveDistanceUnit(unit) {
+			const minimumKilometers = toKilometers(Number(distanceMin.value));
+			const maximumKilometers = toKilometers(Number(distanceMax.value));
+			distanceUnit = unit;
+			try {
+				localStorage.setItem(distanceUnitStorageKey, unit);
+			} catch (error) {
+				showToast("Could not save distance settings in this browser.");
+			}
+			const rangeMaximum = getMaximumDisplayDistance();
+			distanceMin.max = rangeMaximum;
+			distanceMax.max = rangeMaximum;
+			distanceMin.value = Math.min(rangeMaximum, Math.round(toDisplayDistance(minimumKilometers) * 10) / 10);
+			distanceMax.value = Math.min(rangeMaximum, Math.round(toDisplayDistance(maximumKilometers) * 10) / 10);
+			document.getElementById(`unit-${unit === "km" ? "kilometers" : "miles"}`).checked = true;
+			updateDistanceFilter();
+			renderRoutes();
+			const selectedRoute = routes.find((route) => route.id === selectedId);
+			if (selectedRoute) {
+				document.getElementById("active-distance").textContent =
+					selectedRoute.distance != null && Number.isFinite(Number(selectedRoute.distance))
+						? formatDistance(selectedRoute.distance)
+						: "Unavailable";
+			}
+		}
 
 		function applyTheme(theme) {
 			document.documentElement.dataset.theme = theme;
@@ -849,8 +921,8 @@
 		}
 
 		function getFilteredMyRoutes() {
-			const minimumDistance = Number(distanceMin.value);
-			const maximumDistance = Number(distanceMax.value);
+			const minimumDistance = Math.min(toKilometers(Number(distanceMin.value)), maximumDistanceKilometers);
+			const maximumDistance = Math.min(toKilometers(Number(distanceMax.value)), maximumDistanceKilometers);
 			return routes.filter((route) => {
 				const distance = Number(route.distance);
 				return route.distance == null || !Number.isFinite(distance) ||
@@ -907,7 +979,7 @@
 				item.type = "button";
 				item.className = `route-item${route.id === selectedId ? " active" : ""}`;
 				item.setAttribute("aria-pressed", String(route.id === selectedId));
-				item.setAttribute("aria-label", `${route.name}${route.distance ? `, ${Number(route.distance).toFixed(2)} kilometers` : ""}`);
+				item.setAttribute("aria-label", `${route.name}${route.distance ? `, ${formatDistance(route.distance)}` : ""}`);
 				entry.draggable = true;
 				item.setAttribute("aria-keyshortcuts", "Alt+ArrowUp Alt+ArrowDown");
 				item.title = "Drag this route to reorder. Press Alt+Up or Alt+Down to move it.";
@@ -952,7 +1024,7 @@
 				name.textContent = route.name;
 				const distance = document.createElement("span");
 				distance.className = "route-distance";
-				distance.textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
+				distance.textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? formatDistance(route.distance) : "Unavailable";
 				top.append(name, distance);
 
 				const sub = document.createElement("span");
@@ -1085,7 +1157,7 @@
 			document.getElementById("active-name").textContent = route.name;
 			const routeIndex = routes.indexOf(route);
 			document.getElementById("active-kind").textContent = `${(route.kind || "Route").toUpperCase()} · ROUTE ${String(routeIndex + 1).padStart(2, "0")}`;
-			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? `${Number(route.distance).toFixed(2)} km` : "Unavailable";
+			document.getElementById("active-distance").textContent = route.distance != null && Number.isFinite(Number(route.distance)) ? formatDistance(route.distance) : "Unavailable";
 			document.getElementById("active-type").textContent = route.type || "Route";
 			clearTimeout(mapLoadTimer);
 			mapFrame.parentElement.classList.remove("is-empty");
@@ -1129,6 +1201,11 @@
 			selectRoute(route.id);
 		});
 		function updateDistanceFilter(changedInput) {
+			const rangeMaximum = getMaximumDisplayDistance();
+			distanceMin.max = rangeMaximum;
+			distanceMax.max = rangeMaximum;
+			distanceMin.value = Math.min(Number(distanceMin.value), rangeMaximum);
+			distanceMax.value = Math.min(Number(distanceMax.value), rangeMaximum);
 			if (changedInput === distanceMin && Number(distanceMin.value) > Number(distanceMax.value)) {
 				distanceMin.value = distanceMax.value;
 			}
@@ -1137,10 +1214,12 @@
 			}
 			const minimum = Number(distanceMin.value);
 			const maximum = Number(distanceMax.value);
-			document.getElementById("distance-min-value").value = `${minimum.toFixed(1).replace(/\.0$/, "")} km`;
-			document.getElementById("distance-max-value").value = `${maximum.toFixed(1).replace(/\.0$/, "")} km`;
-			distanceSlider.style.setProperty("--range-start", `${minimum / 50 * 100}%`);
-			distanceSlider.style.setProperty("--range-end", `${maximum / 50 * 100}%`);
+			document.getElementById("distance-min-value").value = `${minimum.toFixed(1).replace(/\.0$/, "")} ${distanceUnit}`;
+			document.getElementById("distance-max-value").value = `${maximum.toFixed(1).replace(/\.0$/, "")} ${distanceUnit}`;
+			distanceMin.setAttribute("aria-label", `Minimum route distance in ${distanceUnit === "km" ? "kilometers" : "miles"}`);
+			distanceMax.setAttribute("aria-label", `Maximum route distance in ${distanceUnit === "km" ? "kilometers" : "miles"}`);
+			distanceSlider.style.setProperty("--range-start", `${minimum / rangeMaximum * 100}%`);
+			distanceSlider.style.setProperty("--range-end", `${maximum / rangeMaximum * 100}%`);
 			if (changedInput) renderRoutes();
 		}
 		distanceSlider.addEventListener("pointerdown", (event) => {
@@ -1195,6 +1274,9 @@
 		settingsDialog.addEventListener("change", (event) => {
 			if (event.target instanceof HTMLInputElement && event.target.name === "theme" && themeNames.includes(event.target.value)) {
 				saveTheme(event.target.value);
+			}
+			if (event.target instanceof HTMLInputElement && event.target.name === "distance-unit" && distanceUnits.includes(event.target.value)) {
+				saveDistanceUnit(event.target.value);
 			}
 		});
 
