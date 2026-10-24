@@ -418,6 +418,7 @@
 		.theme-option input:checked + label::after { border: 5px solid var(--route-distance); background: var(--white); }
 		.theme-option input:focus-visible + label { outline: 2px solid var(--coral); outline-offset: 2px; }
 		.settings-section-title { margin: 0 25px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--quiet-text); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+		.theme-section-title { margin-top: 20px; padding-top: 0; border-top: 0; }
 		.unit-options { padding-top: 12px; }
 		.theme-swatch { --preview-accent: #e5e5e5; --preview-muted: #bcbcbc; --preview-surface: #ffffff; --preview-map: #e7e7e7; --preview-route: #666666; display: grid; width: 48px; height: 36px; flex: none; grid-template-rows: 7px 1fr; gap: 3px; padding: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--preview-accent) 25%, transparent); border-radius: 8px; background: var(--preview-surface); box-shadow: 0 1px 3px var(--preview-shadow, #0002); }
 		.theme-swatch.forest { --preview-accent: #102d1d; --preview-muted: #68896f; --preview-surface: #1a2a20; --preview-map: #293a30; --preview-route: #b7dc88; --preview-shadow: #00100820; }
@@ -644,6 +645,7 @@
 			<div><h2 id="settings-title">Your space, your style</h2><p id="settings-description">Choose how Waykeep looks and displays distances on this device.</p></div>
 			<button class="close-dialog" id="close-settings" type="button" aria-label="Close settings">×</button>
 		</div>
+		<h3 class="settings-section-title theme-section-title">Color theme</h3>
 		<div class="theme-options" role="radiogroup" aria-label="Color theme">
 			<div class="theme-option">
 				<input id="theme-forest" name="theme" type="radio" value="forest">
@@ -658,14 +660,14 @@
 				<label for="theme-dark"><span class="theme-swatch dark" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>Dark</strong><span>Layered charcoal for low-light spaces</span></span></label>
 			</div>
 			<div class="theme-option">
-				<input id="theme-system" name="theme" type="radio" value="system">
+				<input id="theme-system" name="theme" type="radio" value="system" checked>
 				<label for="theme-system"><span class="theme-swatch system" aria-hidden="true"><span class="theme-preview-chrome"></span><span class="theme-preview-body"><span class="theme-preview-nav"></span><span class="theme-preview-map"></span></span></span><span class="theme-option-copy"><strong>System</strong><span>Match your device's light or dark mode</span></span></label>
 			</div>
 		</div>
 		<h3 class="settings-section-title">Distance units</h3>
 		<div class="theme-options unit-options" role="radiogroup" aria-label="Distance units">
 			<div class="theme-option">
-				<input id="unit-kilometers" name="distance-unit" type="radio" value="km">
+				<input id="unit-kilometers" name="distance-unit" type="radio" value="km" checked>
 				<label for="unit-kilometers"><span class="theme-option-copy"><strong>Kilometers</strong><span>Show distances in kilometers</span></span></label>
 			</div>
 			<div class="theme-option">
@@ -774,6 +776,10 @@
 					selectedRoute.distance != null && Number.isFinite(Number(selectedRoute.distance))
 						? formatDistance(selectedRoute.distance)
 						: "Unavailable";
+				clearTimeout(mapLoadTimer);
+				mapFrame.parentElement.classList.add("is-loading");
+				mapEmpty.style.display = "none";
+				mapFrame.src = getEmbeddedMapUrl(selectedRoute.url);
 			}
 		}
 
@@ -1167,7 +1173,7 @@
 			routeStats.hidden = false;
 			mapLink.hidden = false;
 			shareRouteButton.hidden = false;
-			mapFrame.src = route.url;
+			mapFrame.src = getEmbeddedMapUrl(route.url);
 			mapLink.href = route.url;
 		}
 
@@ -1290,6 +1296,12 @@
 			const url = new URL(source);
 			if (url.protocol !== "https:") throw new Error("Use a secure https:// map link.");
 			if (!isOnTheGoMapUrl(url.href)) throw new Error("Only On The Go Map links are supported.");
+			return url.href;
+		}
+
+		function getEmbeddedMapUrl(value) {
+			const url = new URL(value);
+			url.searchParams.set("u", distanceUnit);
 			return url.href;
 		}
 
